@@ -73,6 +73,8 @@ else
   export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
 fi
 
+export DOCKER_PLATFORM=$(uname -m)
+
 # import local zsh customizations, if present
 zrcl="$HOME/.zshrc.local"
 
