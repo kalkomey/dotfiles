@@ -60,7 +60,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
 if [ -d /opt/homebrew/opt ]; then
-  export PATH="/opt/homebrew/opt/openssl@1.1/bin:$PATH"
+  export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openssl@1.1/bin:$PATH"
+  export PATH="/opt/homebrew/sbin:$PATH"
   export CPPFLAGS="-I/opt/homebrew/opt/libffi/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/readline/include -I/opt/homebrew/opt/binutils/include"
   export LDFLAGS="-L/opt/homebrew/opt/bison/lib -L/opt/homebrew/opt/libffi/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/readline/lib -L/opt/homebrew/opt/binutils/lib"
   export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:/opt/homebrew/opt/openssl@1.1/lib/pkgconfig:/opt/homebrew/opt/readline/lib/pkgconfig"
