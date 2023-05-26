@@ -54,6 +54,7 @@ brew "ruby-install"
 brew "consul"
 brew "nomad"
 brew "vault"
+brew "tfenv"
 
 # Databases
 brew "mysql@5.7"

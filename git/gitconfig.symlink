@@ -7,7 +7,7 @@
         lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
         ln = log --pretty=format:'%Cblue%h %Cred* %C(yellow)%s'
         pruneremote = remote prune origin
-        reset-authors = commit --amend --reset-author -CHEAD
+        reset-authors = commit --amend -S --reset-author -CHEAD
         ri = rebase --interactive
         st = status
         tr = log --graph --oneline --decorate --color

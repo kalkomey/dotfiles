@@ -20,6 +20,7 @@ get_bundle fatih vim-go
 get_bundle github copilot.vim
 get_bundle godlygeek tabular
 get_bundle hashivim vim-hashicorp-tools
+get_bundle hashivim vim-terraform
 get_bundle jgdavey tslime.vim
 get_bundle jgdavey vim-blockle
 get_bundle jgdavey vim-turbux

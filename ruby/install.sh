@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-RUBIES_TO_INSTALL=(2.7.7 3.0.5 3.1.3)
+RUBIES_TO_INSTALL=(3.0.5 3.1.4)
 DEFAULT_RUBY_VERSION=${RUBIES_TO_INSTALL[1]}
 mkdir -p $HOME/.rubies
 
@@ -17,7 +17,8 @@ for ruby_ver in ${RUBIES_TO_INSTALL[*]}; do
       export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:/opt/homebrew/opt/openssl@1.1/lib/pkgconfig:/opt/homebrew/opt/readline/lib/pkgconfig"
       export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
     else
-      export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+      export PATH="/usr/local/bin:/usr/local/opt/openssl@1.1/bin:$PATH"
+      export PATH="/usr/local/sbin:$PATH"
       export CPPFLAGS="-I/usr/local/opt/libffi/include -I/usr/local/opt/openssl@1.1/include -I/usr/local/opt/readline/include -I/usr/local/opt/binutils/include"
       export LDFLAGS="-L/usr/local/opt/bison/lib -L/usr/local/opt/libffi/lib -L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/readline/lib -L/usr/local/opt/binutils/lib"
       export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:/usr/local/opt/openssl@1.1/lib/pkgconfig:/usr/local/opt/readline/lib/pkgconfig"
