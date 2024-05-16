@@ -63,3 +63,6 @@ brew "postgresql"
 # Javascript
 brew "nvm"
 brew "yarn"
+
+# git
+brew "git-lfs"
