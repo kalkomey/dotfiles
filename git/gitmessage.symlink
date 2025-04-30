@@ -1,0 +1,20 @@
+# Subject: Summary, imperative, sentence case, don't end with a period
+# No more than 50 chars. #### 50 chars is here:  #
+# Imperative mnemonic: "If applied, this commit will [commit subject]"
+
+# Remember blank line between title and body.
+
+# Body: More detailed explanatory text, if necessary.
+# Wrap at 72 chars. ################################## which is here:  #
+# Focus on *what* and *why*, not *how*
+# Are there side effects of this change?
+# Bullet points are okay, use asterisk + single space
+
+# At the end: Include Co-authored-by for all contributors.
+# Include at least one empty line before it. Format:
+# Co-authored-by: name <user@users.noreply.github.com>
+
+# If there's a ClickUp task include a link to it
+#
+# Further guidelines can be found here
+# https://app.clickup.com/9014033846/v/dc/8cmefdp-14234/8cmefdp-10874

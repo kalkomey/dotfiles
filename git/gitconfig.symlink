@@ -26,6 +26,8 @@
         autosetuprebase = always
 [color]
         ui = auto
+[commit]
+        template = ~/.gitmessage
 [core]
         excludesfile = ~/.gitignore
         editor = vim
