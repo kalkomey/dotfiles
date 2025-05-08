@@ -192,5 +192,5 @@ augroup organization
 
   autocmd User Rails nnoremap <buffer> <D-r> :<C-U>Rake<CR>
   autocmd User Rails nnoremap <buffer> <D-R> :<C-U>.Rake<CR>
-  autocmd User Fugitive command! -bang -bar -buffer -nargs=* Gpr :Git<bang> pull --rebase <args>
+  autocmd User Fugitive command! -bang -bar -buffer -nargs=* Gpr :Git<bang> pull --rebase --prune <args>
 augroup END

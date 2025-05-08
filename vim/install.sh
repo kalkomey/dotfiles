@@ -17,7 +17,6 @@ get_bundle() {
 get_bundle duff vim-bufonly
 get_bundle elzr vim-json
 get_bundle fatih vim-go
-get_bundle github copilot.vim
 get_bundle godlygeek tabular
 get_bundle hashivim vim-hashicorp-tools
 get_bundle hashivim vim-terraform
