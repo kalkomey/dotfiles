@@ -102,10 +102,6 @@ Examples:
     $SCRIPT_NAME vault-server management tunnel 8200 8200
     $SCRIPT_NAME consul-server management tunnel 8500 8500
 
-    # Application instances (run in their respective environments)
-    $SCRIPT_NAME app-server staging connect
-    $SCRIPT_NAME web-server production tunnel 8080 8080
-
     # Cleanup
     $SCRIPT_NAME nomad-server-management management cleanup
 
