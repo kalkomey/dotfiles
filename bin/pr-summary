@@ -1,0 +1,95 @@
+#!/bin/zsh
+
+set -e
+
+
+###############################################################################
+# Usage
+###############################################################################
+
+usage=$(cat <<EOF
+Usage: $(basename "$0") [-h | --help]
+
+Options:
+  -h/--help: Show this help message
+
+Example:
+  $ $(basename "$0")
+  Change button color (+67, -67) – https://github.com/kalkomey/kelp/pull/1337
+
+  $ $(basename "$0") | pbcopy
+
+Description:
+  Prints a one-line summary of the open GitHub PR associated with the current
+  branch, in the format:
+
+    <title> (+<lines_added>, -<lines_removed>) – <pr_url>
+
+  Must be run from the root of the repo, on a branch that tracks an upstream
+  branch associated with an open PR.
+
+  Line counts are derived from git directly (via --numstat) rather than the
+  GitHub API such that files marked as binary in .gitattributes are excluded
+  from the count. Diffing is done against the merge base on the remote.
+
+  Prerequisites:
+
+  - git
+    https://git-scm.com/
+
+  - gh (GitHub CLI)
+    https://cli.github.com/
+    https://formulae.brew.sh/formula/gh
+
+EOF
+)
+
+if [[ -z "$1" ]] && [[ $# -eq 0 ]]; then
+  : # no args is valid; proceed
+elif [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+  echo "$usage"
+  exit 0
+else
+  echo "Unknown argument: $1"
+  echo ""
+  echo "$usage"
+  exit 1
+fi
+
+
+###############################################################################
+# Body
+###############################################################################
+
+# Verify upstream tracking branch exists
+if ! git rev-parse --abbrev-ref --symbolic-full-name @{u} \
+    > /dev/null 2>&1; then
+  echo "Error: No upstream tracking branch found" >&2
+  exit 1
+fi
+
+# Get the remote name
+remote=$(git remote | head -1)
+
+# Get PR title, URL, and base branch
+pr_title=$(gh pr view --json title --jq '.title' 2>/dev/null) || {
+  echo "Error: No PR found. Is there an open PR for this branch?" >&2
+  exit 1
+}
+pr_url=$(gh pr view --json url --jq '.url')
+base_branch=$(gh pr view --json baseRefName --jq '.baseRefName')
+
+# Find the merge base on the remote
+merge_base=$(git merge-base HEAD "${remote}/${base_branch}" 2>/dev/null) || {
+  echo "Error: Could not find merge base with ${remote}/${base_branch}" >&2
+  exit 1
+}
+
+# Use --numstat to get per-file added/removed counts. Binary files (including
+# those marked via .gitattributes) show "-" for both counts; filter those lines.
+numstat=$(git diff --numstat "$merge_base" HEAD | awk '$1 != "-" && $2 != "-"')
+
+added=$(echo "$numstat" | awk '{sum += $1} END {print sum+0}')
+removed=$(echo "$numstat" | awk '{sum += $2} END {print sum+0}')
+
+printf '%s (+%s, -%s) – %s\n' "$pr_title" "$added" "$removed" "$pr_url"
