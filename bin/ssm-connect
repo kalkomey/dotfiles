@@ -14,7 +14,7 @@ readonly REQUIRED_COMMANDS=("aws" "awk" "pgrep" "pkill" "jq")
 readonly DEFAULT_CONNECTION_METHOD="connect"
 
 # Valid environments and their AWS account mappings
-readonly VALID_ENVIRONMENTS=("staging" "production" "management")
+readonly VALID_ENVIRONMENTS=("staging" "production" "management" "uat")
 
 # Helper functions to get account info (compatible with older bash)
 get_environment_account() {
@@ -22,6 +22,7 @@ get_environment_account() {
         "staging") echo "086920961728" ;;
         "production") echo "086962800241" ;;
         "management") echo "073638633986" ;;
+        "uat") echo "086962800241" ;;
         *) return 1 ;;
     esac
 }
