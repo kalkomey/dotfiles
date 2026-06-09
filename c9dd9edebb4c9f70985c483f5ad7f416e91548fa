@@ -1,0 +1,68 @@
+intent: >
+  Make the shared bootstrap and shell config Linux-safe (clipboard + SSH keys)
+  without changing macOS behavior — first slice of cross-platform parity.
+slice: 1/6
+kind: fix
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared:
+    - system/clipboard.zsh
+    - system/keys.zsh
+    - script/bootstrap
+    - tmux/tmux.conf.symlink
+    - README.md
+  actual:
+    - system/clipboard.zsh
+    - system/keys.zsh
+    - script/bootstrap
+    - tmux/tmux.conf.symlink
+    - README.md
+  drift: []
+proof:
+  tests_run: "bash -n script/bootstrap; zsh -n system/clipboard.zsh system/keys.zsh; tmux -f <conf> new-session (load check)"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Repo has no automated test suite. Verified manually: clipboard roundtrip on
+    macOS (got expected value back; `whence -w pbcopy` == command, proving the
+    native binary is not shadowed and the shim can't recurse), bash/zsh syntax
+    checks, and a tmux config load confirming the Darwin if-shell branch bound
+    y -> reattach-to-user-namespace pbcopy while Wayland/X11 branches did not fire.
+verification:
+  tested:
+    - "macOS clipboard roundtrip via dot_clipboard_copy/paste returns the written value"
+    - "pbcopy remains the native command on macOS (no shim shadowing / no recursion)"
+    - "tmux Darwin branch binds y to reattach+pbcopy; Wayland/X11 branches skipped"
+  manual:
+    - "bash -n script/bootstrap clean; zsh -n on both .zsh files clean"
+    - "Linux/Wayland path is code-reviewed only — not yet run on a real Ubuntu host (PR 3 verification)"
+assumptions:
+  - "On Ubuntu+Hyprland, WAYLAND_DISPLAY is set in the env tmux's server inherits, so the tmux Wayland if-shell branch fires"
+  - "wl-paste --no-newline approximates pbpaste (no trailing newline); acceptable for shell/tmux paste"
+  - "Generating a new ed25519 key for existing RSA-only users is acceptable; the config repoint is guarded behind 'config absent' so it won't silently change an existing setup"
+specifications:
+  - "Clipboard backend precedence: macOS pbcopy/pbpaste > Wayland wl-clipboard > X11 xclip > xsel > headless (copy echoes+warns, paste returns nonzero)"
+  - "pbcopy/pbpaste shims are defined ONLY when no native command exists (Linux), never on macOS"
+  - "bootstrap clipboard copy is best-effort and never fatal: the public key is always printed regardless of backend"
+deviations_from_plan: none
+trade_offs: >
+  "Accepted three small copies of the clipboard dispatch (clipboard.zsh / bootstrap /
+  tmux.conf) rather than one shared source. They run in different interpreters at
+  different lifecycle points — bootstrap is bash before the zsh env exists; tmux uses
+  run-shell (/bin/sh) and can't see the zsh function — so a single source isn't
+  reachable. Each copy is small and comments why it exists."
+self_review:
+  tests: "No suite in repo; manual verification covers the macOS path. Linux path is review-only until PR 3's Ubuntu VM run."
+  consistency: "alias->function in keys.zsh matches system/aliases.zsh function style; clipboard.zsh reuses the vi:filetype=sh: modeline idiom; tmux per-OS blocks reuse the if-shell form already at tmux.conf:51."
+  duplication: "Deliberate triple mirror of the clipboard dispatch across zsh/bash/sh runtimes — not DRY-able; flagged in comments so it isn't 'fixed' into a broken shared dependency."
+  error_paths: "No-backend handled in all three: copy echoes+warns, paste returns 1; bootstrap prints manual-copy hint and always prints the key; pubkey returns 1 if no *.pub. ssh-keygen -f prompts rather than silently overwriting."
+  security: "ed25519 replaces RSA default; pubkey copies the public key only; IdentityFile repoint is harmless. No secrets touched."
+  api: "pubkey keeps its name and user-facing behavior (alias->function); dot_clipboard_copy/paste are new shell functions. No breaking change."
+  dead_code: "Removed a stray %if/%endif artifact briefly introduced in tmux.conf; nothing orphaned."
+confidence: high
+reviewer_attention:
+  - "system/clipboard.zsh:14-16 — the `command pbcopy` recursion guard is the load-bearing trick"
+  - "tmux/tmux.conf.symlink:33-49 — Wayland/X11 if-shell conditions are untested on real Linux until PR 3"
