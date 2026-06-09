@@ -68,6 +68,17 @@ if command -v pyenv >/dev/null 2>&1; then
   eval "$(pyenv init - zsh)"
 fi
 
+# Java (JDK 17). Homebrew openjdk is keg-only, so point JAVA_HOME at it; on Ubuntu
+# use the apt JDK path. `unsetopt nomatch` above keeps the glob safe when absent.
+for _jdk in /opt/homebrew/opt/openjdk@17 /usr/local/opt/openjdk@17 /usr/lib/jvm/java-17-openjdk-*; do
+  if [ -d "$_jdk" ]; then
+    export JAVA_HOME="$_jdk"
+    export PATH="$JAVA_HOME/bin:$PATH"
+    break
+  fi
+done
+unset _jdk
+
 if [ -d /opt/homebrew/opt ]; then
   export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openssl@1.1/bin:$PATH"
   export PATH="/opt/homebrew/sbin:$PATH"
