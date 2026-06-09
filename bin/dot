@@ -2,37 +2,48 @@
 #
 # dot
 #
-# `dot` handles installation, updates, things like that. Run it periodically
-# to make sure you're on the latest and greatest.
-export DOTHOME=$HOME/.dotfiles
+# Installs and updates everything. Run it periodically to stay current. OS-aware:
+# macOS uses Homebrew; Ubuntu uses apt / vendor repos / official binaries (see
+# docs/package-matrix.md). Each topic installer branches per-OS internally and is
+# safe to re-run, so this is just the ordered orchestration.
+export DOTHOME="$HOME/.dotfiles"
 
 DISTRO=$(uname)
-case $DISTRO in
-  'Linux')
-    sudo apt-get update
-    sudo apt-get -y -q upgrade
-    ;;
-  'Darwin')
-    # Set OS X defaults
-    sh $DOTHOME/osx/set-defaults.sh
-    # Install/upgrade nodes
-    sh $DOTHOME/node/install.sh 2>&1
-    # Install/upgrade homebrew packages
-    echo "Homebrew update"
-    sh $DOTHOME/homebrew/install.sh 2>&1
-    echo "Docker update"
-    sh $DOTHOME/docker/install.sh 2>&1
-    # Install/upgrade rubies
-    echo "Ruby update"
-    sh $DOTHOME/ruby/install.sh 2>&1
-    # Symlink databases
-    echo "Database(s) update"
-    sh $DOTHOME/databases/install.sh 2>&1
-    ;;
-  *)
-    echo "Good luck with that"
-    ;;
-esac
 
-# Install vim bundles
-$DOTHOME/vim/install.sh 2>&1
+# Run a step with a heading. Topic installers carry their own shebang (zsh), so
+# invoke them with the right interpreter rather than `sh` (which mis-runs zsh
+# array logic). Failures are reported but do not abort the rest.
+run() {
+  label=$1
+  shift
+  echo
+  echo "==> ${label}"
+  "$@" 2>&1 || echo "!! ${label} step failed (continuing)"
+}
+
+# OS-native package layer (Homebrew on macOS; apt/vendor/binary on Ubuntu).
+run "Packages" bash "$DOTHOME/script/install-packages"
+
+# macOS desktop defaults.
+if [ "$DISTRO" = "Darwin" ]; then
+  run "macOS defaults" sh "$DOTHOME/osx/set-defaults.sh"
+fi
+
+# Language runtimes + topic installers. Order matters: python before infra
+# (infra's pre-commit/ansible install via pipx from the managed Python).
+run "Ruby"      zsh "$DOTHOME/ruby/install.sh"
+run "Python"    zsh "$DOTHOME/python/install.sh"
+run "Node"      zsh "$DOTHOME/node/install.sh"
+run "Infra"     zsh "$DOTHOME/infra/install.sh"
+run "JVM"       zsh "$DOTHOME/jvm/install.sh"
+run "PHP"       zsh "$DOTHOME/php/install.sh"
+run "Docker"    zsh "$DOTHOME/docker/install.sh"
+run "Databases" zsh "$DOTHOME/databases/install.sh"
+
+# macOS-only iOS toolchain.
+if [ "$DISTRO" = "Darwin" ]; then
+  run "iOS" zsh "$DOTHOME/ios/install.sh"
+fi
+
+# Vim bundles (both OSes).
+run "Vim" sh "$DOTHOME/vim/install.sh"
