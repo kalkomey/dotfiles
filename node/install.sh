@@ -3,8 +3,8 @@
 # Node via nvm (see docs/package-matrix.md). Installs a current LTS default; repos
 # pin their own version via .nvmrc. Independently runnable.
 #
-# NOTE: the default below is a baseline — confirm against the team's apps before
-# merging. Older apps install their Node per-repo via nvm + .nvmrc.
+# The default matches kelp's .nvmrc (the primary app); other repos override
+# per-repo via their own .nvmrc (run `nvm install` in the repo).
 
 export NVM_DIR="$HOME/.nvm"
 
@@ -22,7 +22,7 @@ elif [[ "$(uname)" == "Linux" ]]; then
   . "$NVM_DIR/nvm.sh"
 fi
 
-NODES_TO_INSTALL=(22)
+NODES_TO_INSTALL=(22.14.0)   # matches kelp's .nvmrc (the primary app)
 DEFAULT_NODE_VERSION=${NODES_TO_INSTALL[1]}
 
 echo "Installing nodes"

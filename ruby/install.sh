@@ -3,10 +3,10 @@
 # Ruby via ruby-install + chruby (see docs/package-matrix.md). Installs a modern
 # default; repos pin their own version via .ruby-version. Independently runnable.
 #
-# NOTE: the default below is a baseline — confirm against the team's apps before
-# merging. Older 2.x apps that need openssl@1.1 install their Ruby per-repo.
+# The default matches kelp's .ruby-version (the primary app); other repos override
+# per-repo via their own .ruby-version. Older 2.x apps install their Ruby per-repo.
 
-RUBIES_TO_INSTALL=(3.3.6)
+RUBIES_TO_INSTALL=(3.4.9)   # matches kelp's .ruby-version (the primary app)
 DEFAULT_RUBY_VERSION=${RUBIES_TO_INSTALL[1]}
 mkdir -p "$HOME/.rubies"
 
