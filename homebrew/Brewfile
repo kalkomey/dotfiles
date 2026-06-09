@@ -69,5 +69,9 @@ brew "postgresql"
 brew "nvm"
 brew "yarn"
 
+# Python
+brew "pyenv"
+brew "pipx"
+
 # git
 brew "git-lfs"
