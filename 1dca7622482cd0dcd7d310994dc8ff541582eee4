@@ -1,0 +1,75 @@
+intent: >
+  Provide OS-native package installation (uname dispatcher + macOS wrapper +
+  Ubuntu-native base installer) as the first real-Linux-behavior slice.
+slice: 3/6
+kind: feature
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared:
+    - script/install-packages
+    - script/packages/darwin.sh
+    - script/packages/ubuntu.sh
+    - homebrew/install.sh
+    - homebrew/Brewfile
+  actual:
+    - script/install-packages
+    - script/packages/darwin.sh
+    - script/packages/ubuntu.sh
+    - homebrew/install.sh
+    - homebrew/Brewfile
+  drift: []
+proof:
+  tests_run: "bash -n + zsh -n on all changed scripts; shellcheck (0.11.0) on the three new scripts; dispatcher path-resolution + routing harness on macOS"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No automated suite in repo. Verified: all scripts pass bash -n / zsh -n;
+    shellcheck clean at info severity on the three new scripts; the dispatcher
+    resolves HERE to the repo root and routes Darwin->darwin.sh, Linux+apt->ubuntu.sh,
+    other->error; darwin.sh resolves to the existing homebrew/install.sh.
+lint:
+  run: "shellcheck script/install-packages script/packages/darwin.sh script/packages/ubuntu.sh"
+  result: clean
+  count: 0
+verification:
+  tested:
+    - "Dispatcher routing for Darwin / Linux+apt / unsupported (macOS harness)"
+    - "darwin.sh -> homebrew/install.sh path exists and resolves"
+    - "shellcheck clean; bash -n/zsh -n clean"
+  manual:
+    - "ubuntu.sh NOT executed — no apt host available. Reviewed line-by-line; real run is PR 3 Ubuntu VM verification"
+assumptions:
+  - "HashiCorp apt packages (vault/nomad/consul) install their systemd units disabled/unconfigured and do NOT auto-start a local server; the team uses them as CLI clients via VAULT_ADDR/NOMAD_ADDR. MUST be confirmed on the Ubuntu VM"
+  - "Ubuntu 24.04 apt package names are current: ripgrep, fd-find (binary fdfind), silversearcher-ag (ag), ack, shellcheck, wl-clipboard"
+  - "AWS CLI v2 zip exists for both x86_64 and aarch64 (dpkg arch arm64 -> aarch64 mapping)"
+  - "VERSION_CODENAME from /etc/os-release is 'noble' on 24.04; falls back to noble if unset"
+specifications:
+  - "Topic ownership: ubuntu.sh installs the base layer + homeless CLIs (HashiCorp, GitHub CLI, AWS CLI) ONLY; Docker/databases/Ruby/Node are owned by their topic installers, not ubuntu.sh"
+  - "AWS CLI on Ubuntu = official v2 installer with --update (idempotent), never apt"
+  - "homebrew/install.sh exits 0 on non-Darwin; no Homebrew-on-Linux default"
+  - "install-packages is the extensionless command entrypoint; per-OS installers carry .sh"
+deviations_from_plan: >
+  "Plan W2 listed Docker under ubuntu.sh's vendor repos, but W3 owns Docker in
+  docker/install.sh. Resolved the redundancy toward single ownership: Docker (and
+  databases) stay with their topic installers; ubuntu.sh does not touch them.
+  Recorded so the drift detector / reviewer sees it was intentional."
+trade_offs: >
+  "darwin.sh is a thin exec wrapper over homebrew/install.sh rather than
+  duplicating Homebrew bootstrap, keeping one source of that logic while still
+  giving macOS a symmetric per-OS entry point. ubuntu.sh installs HashiCorp tools
+  from apt per the matrix rather than pinned binaries; exact-version pinning (matrix
+  says Terraform=exact) is deferred and may need tfenv-style handling later."
+self_review:
+  consistency: "uname case-dispatch mirrors bin/dot's existing Darwin/Linux switch; .sh on nested installers matches the repo's install.sh convention; install-packages extensionless matches script/bootstrap and script/install."
+  metz: "Shell, not Ruby. ubuntu.sh is decomposed into one-job helpers (install_apt_packages / install_github_cli_repo / install_hashicorp_repo / install_aws_cli_v2) called from a short main()."
+  duplication: "No new dispatch duplication; darwin.sh delegates rather than copies Homebrew logic."
+  error_paths: "set -euo pipefail throughout; pipefail covers the wget|tee and wget|gpg pipelines; repo-add steps guarded so re-runs don't re-import keys; AWS install --update is idempotent."
+  security: "Vendor GPG keys fetched over https into /etc/apt/keyrings and /usr/share/keyrings with signed-by= in the source lines (no unsigned apt, no global trust). AWS installer run from a mktemp dir and cleaned up."
+  api: "New entrypoints only; no existing caller changes. bin/dot still calls homebrew/install.sh directly until PR 3 wires the dispatcher."
+confidence: medium
+reviewer_attention:
+  - "script/packages/ubuntu.sh:60-74 — install_hashicorp_repo: does apt install vault/nomad/consul start a local server? Confirm on the VM (assumptions above)"
+  - "script/packages/ubuntu.sh:76-89 — AWS CLI v2 arch mapping + --update idempotency, unrun locally"
