@@ -1,42 +1,36 @@
 #!/usr/bin/env zsh
+#
+# Ruby via ruby-install + chruby (see docs/package-matrix.md). Installs a modern
+# default; repos pin their own version via .ruby-version. Independently runnable.
+#
+# NOTE: the default below is a baseline — confirm against the team's apps before
+# merging. Older 2.x apps that need openssl@1.1 install their Ruby per-repo.
 
-RUBIES_TO_INSTALL=(3.0.5 3.1.4)
+RUBIES_TO_INSTALL=(3.3.6)
 DEFAULT_RUBY_VERSION=${RUBIES_TO_INSTALL[1]}
-mkdir -p $HOME/.rubies
+mkdir -p "$HOME/.rubies"
+
+OS="$(uname)"
+
+# Build flags. macOS: point at Homebrew openssl@3. Ubuntu: rely on the apt -dev
+# packages installed by script/packages/ubuntu.sh (libssl-dev, libyaml-dev, …) —
+# no Homebrew paths. (Ruby 3.1+ builds cleanly against OpenSSL 3.)
+if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
+  brew_prefix="$(brew --prefix)"
+  if [ -d "${brew_prefix}/opt/openssl@3" ]; then
+    export RUBY_CONFIGURE_OPTS="--with-openssl-dir=${brew_prefix}/opt/openssl@3"
+  fi
+fi
 
 echo "Installing rubies"
 for ruby_ver in ${RUBIES_TO_INSTALL[*]}; do
-  ls -x $HOME/.rubies | grep ${ruby_ver} 2> /dev/null
-  if [[ "$?" -eq "1" ]]; then
-
-    if [ -d /opt/homebrew/opt ]; then
-      export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openssl@1.1/bin:$PATH"
-      export PATH="/opt/homebrew/sbin:$PATH"
-      export CPPFLAGS="-I/opt/homebrew/opt/libffi/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/readline/include -I/opt/homebrew/opt/binutils/include"
-      export LDFLAGS="-L/opt/homebrew/opt/bison/lib -L/opt/homebrew/opt/libffi/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/readline/lib -L/opt/homebrew/opt/binutils/lib"
-      export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:/opt/homebrew/opt/openssl@1.1/lib/pkgconfig:/opt/homebrew/opt/readline/lib/pkgconfig"
-      export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
-    else
-      export PATH="/usr/local/bin:/usr/local/opt/openssl@1.1/bin:$PATH"
-      export PATH="/usr/local/sbin:$PATH"
-      export CPPFLAGS="-I/usr/local/opt/libffi/include -I/usr/local/opt/openssl@1.1/include -I/usr/local/opt/readline/include -I/usr/local/opt/binutils/include"
-      export LDFLAGS="-L/usr/local/opt/bison/lib -L/usr/local/opt/libffi/lib -L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/readline/lib -L/usr/local/opt/binutils/lib"
-      export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:/usr/local/opt/openssl@1.1/lib/pkgconfig:/usr/local/opt/readline/lib/pkgconfig"
-      export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
-    fi
-
-    echo "Installing: ruby-${ruby_ver}"
-    ruby-install ruby ${ruby_ver}
-  else
+  if [ -d "$HOME/.rubies/ruby-${ruby_ver}" ]; then
     echo "ruby-${ruby_ver} already installed"
+  else
+    echo "Installing: ruby-${ruby_ver}"
+    ruby-install --no-reinstall ruby "${ruby_ver}"
   fi
 done
 
-echo "To compile mysql2, you may need to run:"
-echo
-echo 'bundle config --local build.mysql2 "--with-ldflags=-L/usr/local/opt/openssl/lib --with-cppflags=-I/usr/local/opt/openssl/include"'
-echo "gem install mysql2 -v '0.5.3'"
-echo
-
 echo "Setting default ruby to ${DEFAULT_RUBY_VERSION}"
-echo ${DEFAULT_RUBY_VERSION} > $HOME/.ruby-version
+echo "${DEFAULT_RUBY_VERSION}" > "$HOME/.ruby-version"
