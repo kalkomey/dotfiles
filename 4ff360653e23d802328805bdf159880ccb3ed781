@@ -1,0 +1,38 @@
+intent: >
+  Establish the cross-platform package contract (ownership rules + capability
+  matrix) as a reviewable doc before any installer code changes.
+slice: 2/6
+kind: chore
+behavior_change: none
+reversibility: trivial
+scope:
+  declared:
+    - docs/package-matrix.md
+  actual:
+    - docs/package-matrix.md
+  drift: []
+proof:
+  tests_run: "awk pipe-count check on the markdown table"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Documentation only, no executable change. Verified the matrix table has a
+    consistent column count across all rows.
+specifications:
+  - "Parity is by capability, not package manager: macOS=Homebrew, Ubuntu=apt/vendor-apt/official-binary, runtimes in topic installers, Homebrew-on-Linux only as explicit exception"
+  - "AWS CLI on Ubuntu = official v2 installer, never apt (apt ships v1)"
+  - "GitHub CLI on Ubuntu = GitHub official apt repo (avoid distro lag)"
+  - "Yarn via Corepack on both; never `apt install yarn` (installs cmdtest)"
+  - "Version column contract: exact (pinned both OSes) | major (compatible line) | latest"
+  - "Matrix must be updated in the same PR that adds/removes/moves a shared tool"
+deviations_from_plan: none
+trade_offs: >
+  "Split the package work into contract (this slice) then installers (PR 2B) so
+  reviewers can argue the ownership model before scripts depend on it."
+self_review:
+  consistency: "Encodes the operating model from the approved plan verbatim; no new decisions introduced here."
+confidence: high
+reviewer_attention:
+  - "docs/package-matrix.md — the Version column (exact vs major) per row is the judgment worth a second look; runtimes marked exact, Terraform exact, CLIs major"
