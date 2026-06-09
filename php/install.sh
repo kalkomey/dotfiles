@@ -17,6 +17,9 @@ if [[ "$OS" == "Darwin" ]]; then
   fi
 elif [[ "$OS" == "Linux" ]]; then
   export DEBIAN_FRONTEND=noninteractive
+  # PHP 8.2 isn't in Ubuntu 24.04 (noble ships 8.3); the ondrej/php PPA provides it.
+  sudo apt-get install -y -qq software-properties-common
+  sudo add-apt-repository -y ppa:ondrej/php
   sudo apt-get update -qq
   sudo apt-get install -y -qq \
     php8.2 php8.2-cli php8.2-common php8.2-mbstring php8.2-xml php8.2-curl php8.2-mysql unzip

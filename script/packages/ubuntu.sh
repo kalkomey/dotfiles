@@ -34,7 +34,7 @@ install_apt_packages() {
     build-essential gcc make autoconf bison pkg-config \
     libssl-dev libyaml-dev libffi-dev zlib1g-dev libreadline-dev libgdbm-dev \
     ca-certificates curl wget gnupg unzip \
-    git git-lfs vim tmux \
+    zsh git git-lfs vim tmux \
     jq ripgrep fd-find silversearcher-ag ack shellcheck fzf \
     imagemagick wl-clipboard xclip
 
