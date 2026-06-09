@@ -4,6 +4,7 @@
 
 tap "homebrew/bundle"
 tap "homebrew/services"
+tap "terraform-linters/tap"
 
 # Text editors
 brew "ctags-exuberant"
@@ -60,6 +61,15 @@ brew "consul"
 brew "nomad"
 brew "vault"
 brew "tfenv"
+brew "packer"
+
+# Infrastructure quality (Terraform lint/security/docs + pre-commit + ansible)
+brew "pre-commit"
+brew "terraform-linters/tap/tflint"
+brew "tfsec"
+brew "trivy"
+brew "terraform-docs"
+brew "ansible"
 
 # Databases
 brew "mysql@5.7"

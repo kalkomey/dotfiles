@@ -60,7 +60,7 @@ install_github_cli_repo() {
 }
 
 install_hashicorp_repo() {
-  log "Installing HashiCorp tools (terraform, vault, nomad, consul) from HashiCorp's apt repo"
+  log "Installing HashiCorp tools (terraform, vault, nomad, consul, packer) from HashiCorp's apt repo"
   if [ ! -f /usr/share/keyrings/hashicorp-archive-keyring.gpg ]; then
     wget -qO- https://apt.releases.hashicorp.com/gpg \
       | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -68,9 +68,10 @@ install_hashicorp_repo() {
   echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${CODENAME} main" \
     | sudo tee /etc/apt/sources.list.d/hashicorp.list >/dev/null
   sudo apt-get update -qq
-  # These are used as CLI clients (VAULT_ADDR/NOMAD_ADDR point at remote servers);
-  # we install the binaries but do not enable any systemd services.
-  sudo apt-get install -y -qq terraform vault nomad consul
+  # terraform/vault/nomad/consul are used as CLI clients (VAULT_ADDR/NOMAD_ADDR
+  # point at remote servers); we install the binaries but do not enable services.
+  # packer is the infra topic's only HashiCorp-repo tool (rest of infra is in infra/install.sh).
+  sudo apt-get install -y -qq terraform vault nomad consul packer
 }
 
 install_aws_cli_v2() {
