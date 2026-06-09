@@ -59,6 +59,15 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm on newer Homebrew installs
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
+# pyenv (Python version manager). Works for Homebrew (macOS) and ~/.pyenv (Linux).
+if [ -d "$HOME/.pyenv" ]; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  [ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH"
+fi
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init - zsh)"
+fi
+
 if [ -d /opt/homebrew/opt ]; then
   export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openssl@1.1/bin:$PATH"
   export PATH="/opt/homebrew/sbin:$PATH"
