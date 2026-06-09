@@ -23,6 +23,14 @@ defaults, and so on. Tweak this script, and occasionally run `dot` from
 time to time to keep your environment fresh and up-to-date. You can find
 this script in `bin/`.
 
+## cross-platform notes
+
+Cross-platform parity (macOS + Ubuntu) is a work in progress. The shared bootstrap is
+platform-aware where it counts: SSH keys are generated as `ed25519`, and clipboard
+access goes through a single abstraction (`system/clipboard.zsh`) that uses the native
+`pbcopy`/`pbpaste` on macOS, `wl-clipboard` on Wayland, and `xclip` on X11 — so `pbcopy`,
+the `pubkey` helper, and tmux copy/paste work the same on every platform.
+
 ## custom install
 
 If you are using an alternative shell like fish, or alternative version manager software like asdf, some of the commands might not be a good fit for you. You might also want to ignore certain aliases or osx configuration changes to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`. You might also need some of the workarounds like the ones for mysql described in `ruby/install.sh`.
