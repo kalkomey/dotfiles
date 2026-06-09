@@ -1,0 +1,66 @@
+intent: >
+  Add jvm/php/ios topic installers (+ Brewfile + JAVA_HOME) for the ready-to-work
+  machine scope from the second ecosystem audit.
+slice: "2E/6"
+kind: feature
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared:
+    - jvm/install.sh
+    - php/install.sh
+    - ios/install.sh
+    - homebrew/Brewfile
+    - zsh/zshrc.symlink
+  actual:
+    - jvm/install.sh
+    - php/install.sh
+    - ios/install.sh
+    - homebrew/Brewfile
+    - zsh/zshrc.symlink
+  drift: []
+proof:
+  tests_run: "zsh -n on the three installers + zshrc; JAVA_HOME glob no-match safety test; brew info on the 5 new formulae"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No suite; zsh -n on all four touched scripts. Confirmed openjdk@17/php@8.2/
+    composer/cocoapods/swiftlint are valid core formulae (dotnet-sdk is a cask, left
+    opt-in). Verified the JAVA_HOME for-loop survives a no-match glob under the
+    `unsetopt nomatch` already set in zshrc. Installers themselves NOT executed —
+    Linux apt paths and macOS keg installs are review-only until the VM run.
+verification:
+  tested:
+    - "zsh -n on jvm/php/ios installers and zshrc.symlink"
+    - "JAVA_HOME glob loop no-ops safely when no JDK present"
+    - "5 new Brewfile formulae valid in homebrew/core"
+  manual:
+    - "Installer apt/brew paths reviewed only, not run"
+assumptions:
+  - "openjdk@17 / openjdk-17-jdk satisfy Gradle 8.x (JDK 17+)"
+  - "php8.2 + listed extensions are the right Ubuntu apt set for eRegulations-style work"
+  - "Homebrew openjdk@17 lives at {/opt/homebrew,/usr/local}/opt/openjdk@17; Ubuntu apt JDK at /usr/lib/jvm/java-17-openjdk-*"
+specifications:
+  - "JDK 17 is the JVM floor; JAVA_HOME set in zshrc (keg-only Homebrew openjdk needs the explicit path)"
+  - "PHP targets 8.2 only; Composer installed via official installer + sha384 signature check on Linux"
+  - "ios topic is macOS-only and exits 0 on Linux; Xcode.app and Fastlane are out of the installer's scope"
+  - ".NET SDK stays opt-in (documented cask), not in the default brew bundle"
+deviations_from_plan: none
+trade_offs: >
+  "ios/install.sh covers only the scriptable parts (CLT + brew tools); Xcode.app
+  can't be brew-installed so it's documented, not automated. PHP pinned to a single
+  modern line (8.2) rather than supporting the legacy 5.x/7.x apps, which stay
+  Dockerized per the matrix. JAVA_HOME uses a glob loop relying on the existing
+  `unsetopt nomatch` rather than adding guards."
+self_review:
+  consistency: "Three installers mirror python/ruby topic shape (per-OS branch, set -e, Homebrew-missing guard); Brewfile sections match the existing grouping; JAVA_HOME block sits with the other runtime-init blocks (nvm/pyenv) in zshrc."
+  error_paths: "set -e; Homebrew-missing and unsupported-OS exit 1; ios no-ops on Linux (exit 0); composer install gated on a signature match, skipped loudly on mismatch."
+  security: "Linux Composer install uses the official installer.sig sha384 check before running the setup script — not a blind curl|bash."
+  api: "Three new topic installers; Brewfile + zshrc additions (additive). Not yet called by bin/dot (PR 3)."
+confidence: medium
+reviewer_attention:
+  - "zsh/zshrc.symlink:71-80 — JAVA_HOME glob loop; relies on `unsetopt nomatch` set earlier in the file"
+  - "php/install.sh:24-35 — Linux Composer install + signature check, unrun"
+  - "ios/install.sh:16-20 — xcode-select --install opens a GUI prompt; behavior on a fresh Mac is review-only"
