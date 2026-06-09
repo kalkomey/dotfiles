@@ -1,0 +1,64 @@
+intent: >
+  Fix the five Ubuntu installer bugs surfaced by an actual Ubuntu 24.04 arm64 VM
+  run of the full stack; the first empirically-verified slice.
+slice: "verification/fixes"
+kind: fix
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared: [script/packages/ubuntu.sh, ruby/install.sh, infra/install.sh, php/install.sh]
+  actual: [script/packages/ubuntu.sh, ruby/install.sh, infra/install.sh, php/install.sh]
+  drift: []
+proof:
+  tests_run: "zsh -n on the 3 zsh installers; shellcheck script/packages/ubuntu.sh; full stack run on an Ubuntu 24.04 arm64 Lima VM; pinned-tflint URL fetch test"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    This IS the test slice. Ran the whole stack on a real Ubuntu 24.04 VM; each
+    fix re-verified: zsh installs; ruby-install+chruby install from source and
+    Ruby 3.3.6 builds; ansible-core==2.18.7 installs; php8.2 installs via ondrej
+    PPA + composer; tflint pinned binary downloads and runs (0.63.1, arm64).
+    Final script/doctor: 40 ok / 2 note / 1 missing (aws-vault, documented caveat).
+lint:
+  run: "shellcheck script/packages/ubuntu.sh"
+  result: clean
+  count: 0
+verification:
+  tested:
+    - "Fresh Ubuntu 24.04 arm64 Lima VM, full stack: ubuntu.sh, python, ruby, node, infra, jvm, php, docker, databases all reach exit 0"
+    - "Ruby 3.3.6 built against OpenSSL 3; Node 22.22.3 via nvm-on-Linux; Python 3.12.8; JDK 17.0.19; PHP 8.2.31 + Composer 2.10.1; ansible-core 2.18.7; Docker 29.5.3"
+    - "Pinned tflint binary URL fetches + runs on arm64"
+    - "Final doctor: 40 ok, 1 missing (aws-vault)"
+  manual:
+    - "Tested on arm64 (Apple Silicon host); amd64 dpkg arch path is by analogy, not separately run"
+    - "The earlier docker exit-100 was an apt-lock collision from my PARALLEL test runs, not a bug — bin/dot runs installers sequentially; docker re-ran clean alone"
+assumptions:
+  - "ruby-install 0.9.3 / chruby 0.3.9 release tarballs are current and build with make"
+  - "tflint 0.63.1 and the ondrej/php PPA remain available; amd64 release-asset naming matches arm64"
+  - "ansible-core 2.18.7 is the engine version ansible-ke's 'ansible@2.18.7' pin refers to"
+specifications:
+  - "ubuntu.sh installs zsh (the dotfiles' shell; topic installers require it)"
+  - "On Ubuntu, ruby-install+chruby are built from source if absent; ruby/install.sh now hard-fails if ruby-install can't be obtained (no more silent exit 0)"
+  - "Ubuntu PHP 8.2 comes from ppa:ondrej/php (not in noble base)"
+  - "tflint installs from a pinned release binary, not its deprecated install script"
+deviations_from_plan: >
+  "These fixes belong to the original PRs (#12 ubuntu.sh, #17 ruby, #14 infra, #15 php)
+  but are batched into one verification PR rather than rebased into each stacked branch —
+  cleaner given the open stack, and keeps the VM-findings evidence in one place. Commit
+  body + this note map each fix to its home PR."
+trade_offs: >
+  "One combined fix-PR over distributing-and-rebasing the stack: less per-PR-clean, much
+  less rebase risk. Left aws-vault uninstalled on Ubuntu (needs a keyring backend) — it's
+  the documented matrix caveat and the single remaining doctor [miss]."
+self_review:
+  consistency: "tflint now matches terraform-docs' pinned-binary pattern; ruby-install/chruby from-source mirrors the python pyenv.run approach; ondrej PPA is the standard php-on-Ubuntu path."
+  error_paths: "ruby gained a hard guard (exit 1 if ruby-install absent), fixing the prior silent success; other fixes are additive package installs."
+  security: "tflint moved OFF a curl|bash to a pinned binary (reduces supply-chain surface); ondrej PPA is the well-known community PHP source; composer still signature-checked."
+  api: "Installer-internal; no entrypoint/contract changes."
+confidence: high
+reviewer_attention:
+  - "infra/install.sh:43-50 — tflint pinned binary replaces the deprecated script (VM-verified on arm64)"
+  - "ruby/install.sh:15-33 — ruby-install/chruby from-source bootstrap + the no-silent-success guard"
+  - "amd64 paths (php PPA, tflint/terraform-docs assets) verified by analogy only; host VM was arm64"
