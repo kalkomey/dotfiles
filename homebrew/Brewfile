@@ -1,3 +1,7 @@
+# macOS package list (Apple Silicon). This is the macOS source of record per
+# docs/package-matrix.md; the Ubuntu equivalents live in script/packages/ubuntu.sh
+# and the topic installers. Consumed only on macOS via homebrew/install.sh.
+
 tap "homebrew/bundle"
 tap "homebrew/services"
 

@@ -4,6 +4,15 @@
 #
 # This installs some of the common dependencies needed (or at least desired)
 # using Homebrew.
+#
+# macOS only. Homebrew is the macOS package source (see docs/package-matrix.md);
+# Ubuntu uses apt / vendor repos via script/packages/ubuntu.sh. We do not default
+# to Homebrew-on-Linux.
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  echo "homebrew/install.sh is macOS only; on Ubuntu use script/packages/ubuntu.sh" >&2
+  exit 0
+fi
 
 BREW_COMMAND=$(which brew)
 
