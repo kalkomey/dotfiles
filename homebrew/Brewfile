@@ -83,5 +83,19 @@ brew "yarn"
 brew "pyenv"
 brew "pipx"
 
+# JVM (JDK 17 — Gradle 8.x / Android)
+brew "openjdk@17"
+
+# PHP (modern line — eRegulations; legacy PHP stays Dockerized)
+brew "php@8.2"
+brew "composer"
+
+# iOS (macOS only). Xcode.app is Mac App Store; Fastlane is per-repo via Bundler.
+brew "cocoapods"
+brew "swiftlint"
+
+# .NET SDK is opt-in / niche (modern cross-platform tools only) — install on demand:
+#   brew install --cask dotnet-sdk
+
 # git
 brew "git-lfs"
