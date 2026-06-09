@@ -1,0 +1,43 @@
+intent: >
+  Reframe the matrix as a "ready-to-work dev machine" contract (not strict parity)
+  and add the JVM/PHP/.NET/iOS capabilities the second ecosystem audit surfaced,
+  with recorded out-of-scope decisions.
+slice: "2/6"
+kind: chore
+behavior_change: none
+reversibility: trivial
+scope:
+  declared: [docs/package-matrix.md]
+  actual: [docs/package-matrix.md]
+  drift: []
+proof:
+  tests_run: "awk pipe-count table consistency check"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: "Doc only; table column count verified consistent (7 pipes) after additions."
+specifications:
+  - "The matrix documents a ready-to-work Kalkomey machine: cross-platform rows; macOS-only rows carry Ubuntu=n/a (iOS); legacy/single-platform stacks are recorded out-of-scope, not omitted"
+  - "JDK target is 17+ (Gradle 8.x floor); PHP target is 8.2 (eRegulations); .NET SDK is opt-in/niche (modern cross-platform tools only)"
+  - "iOS toolchain (Xcode/CocoaPods/SwiftLint/Fastlane) is macOS-only by platform necessity, not omission"
+  - "Per-project toolchains (php-cs-fixer, PHPUnit, fastlane via Bundler, gradle wrapper) ride their project's package manager, not the shared baseline"
+assumptions:
+  - "openjdk@17 / openjdk-17-jdk satisfy hw-android's Gradle 8.12 (JDK 17+)"
+  - "eRegulations' platform.php=8.2 pin is the right modern PHP target"
+  - "Modern cross-platform .NET tools target net6-8; SDK 8.0 LTS is an acceptable default"
+deviations_from_plan: >
+  "Scope broadened from strict macOS<->Ubuntu parity to 'ready-to-work machine,'
+  per explicit user direction, which legitimizes macOS-only rows. Installer support
+  for jvm/php/.NET/ios is follow-on work (topic installers + Brewfile); Xcode in
+  particular is only partly scriptable (Mac App Store / xcode-select)."
+trade_offs: >
+  "Included .NET SDK as an opt-in row rather than omitting it (analyst flagged it
+  niche) to honor 'ready to work' while signaling it's not default. iOS rows use
+  n/a for Ubuntu rather than forcing a two-column fit. Version granularity stays
+  'major' here; exact pins (Fastlane/CocoaPods/JDK) land at the installer layer."
+self_review:
+  consistency: "New rows reuse the column grammar; new owners (jvm/php/dotnet/ios) follow the existing lowercase owner convention; out-of-scope recorded as prose like the devbox stance."
+confidence: high
+reviewer_attention:
+  - "docs/package-matrix.md:79-86 — the new rows: JDK 17 target, PHP 8.2, .NET opt-in, and the four macOS-only iOS rows; confirm these match intent before installers are built"
