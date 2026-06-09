@@ -1,0 +1,36 @@
+intent: >
+  Close the matrix<->Brewfile gap: declare ripgrep/fd/yq/shellcheck on macOS so
+  the Homebrew source of record satisfies docs/package-matrix.md.
+slice: 3/6
+kind: chore
+behavior_change: additive
+reversibility: trivial
+scope:
+  declared:
+    - homebrew/Brewfile
+  actual:
+    - homebrew/Brewfile
+  drift: []
+proof:
+  tests_run: "brew info --formula fd ripgrep shellcheck yq (all valid)"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Declarative manifest. Confirmed all four are valid Homebrew formulae via
+    brew info; they install on the next `brew bundle` and have Ubuntu apt
+    counterparts already in script/packages/ubuntu.sh.
+specifications:
+  - "The Brewfile must satisfy every macOS row of docs/package-matrix.md; a matrix row without a Brewfile entry is a bug in the Brewfile"
+deviations_from_plan: >
+  "Brewfile package additions were nominally PR 4 territory, but these four are the
+  matrix rows that were already unsatisfied; aligning them now keeps the PR 2A
+  contract honest rather than shipping a knowingly-unsatisfied matrix. Version
+  modernization (EOL pins) remains in PR 4."
+trade_offs: >
+  "Added to the macOS list to match the contract; the Ubuntu side already installs
+  ripgrep/fd-find/shellcheck (yq is documented as apt-or-binary in the matrix)."
+self_review:
+  consistency: "Inserted alphabetically within the existing Terminal Tools section; same `brew \"name\"` form as surrounding lines."
+confidence: high
