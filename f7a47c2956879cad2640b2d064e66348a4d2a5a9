@@ -1,0 +1,49 @@
+intent: >
+  Update the package contract from a real audit of active repos: add the infra
+  quality toolchain, Python (pyenv), make, pre-commit; correct Node/.nvmrc and
+  the database service notes; record the devbox stance.
+slice: 2/6
+kind: chore
+behavior_change: none
+reversibility: trivial
+scope:
+  declared:
+    - docs/package-matrix.md
+  actual:
+    - docs/package-matrix.md
+  drift: []
+proof:
+  tests_run: "awk pipe-count consistency check on the markdown table"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Documentation only. Verified the table column count stays consistent (7 pipes)
+    across all rows after the additions.
+specifications:
+  - "Python is a managed runtime via pyenv, pinned per-repo via .python-version (parity with chruby/nvm)"
+  - "Node pins via .nvmrc (org standard), corrected from .node-version"
+  - "Infra quality toolchain (tflint/tfsec/terraform-docs/packer) + pre-commit + ansible are owned: macOS Homebrew; Ubuntu via apt/pipx/binary/HashiCorp-repo per row"
+  - "devbox is sanctioned for per-repo toolchains but out of scope for the shared per-developer baseline; dotfiles neither install nor depend on it"
+  - "tfsec is maintenance-mode (folded into Trivy); its row notes the migration as a conscious future choice"
+assumptions:
+  - "The audit (active repos sampled, not all 324) is representative; long-tail tools in dormant PHP/C#/Swift/Kotlin repos are out of scope for shared backend/infra dotfiles"
+  - "tflint/tfsec/terraform-docs have no apt package and install via their official scripts/binaries on Ubuntu"
+  - "ansible 2.18.x pin (from ansible-ke) is the intended floor; install via pipx to honor the pin"
+deviations_from_plan: >
+  "Scope grew beyond the original matrix: two new topic areas (python/, infra/) and
+  ubuntu.sh/Brewfile additions now follow, per the user's 'matrix now, build
+  installers in-plan' decision. The PR sequence absorbs this; installer work is the
+  next slices."
+trade_offs: >
+  "Kept infra-tool version pins at 'major' in the matrix and deferred exact pins to
+  the installer layer, where the pre-commit configs give hard numbers. Adding tfsec
+  despite its maintenance status to match what repos use today, with a Trivy note so
+  it isn't mistaken for a fresh endorsement."
+self_review:
+  consistency: "New rows reuse the existing column grammar and owner vocabulary (base/infra/python); devbox documented as prose, not a row, since it's a stance not a capability."
+confidence: high
+reviewer_attention:
+  - "docs/package-matrix.md — Python row marked Version=exact (managed like Ruby/Node); confirm that's the intent vs 'major'"
+  - "docs/package-matrix.md — the tfsec row: keep it, or jump straight to Trivy? Flagged but not decided"
