@@ -1,0 +1,22 @@
+intent: >
+  Record Trivy in the contract alongside tfsec, reflecting the "install both
+  during migration" decision.
+slice: "2/6"
+kind: chore
+behavior_change: none
+reversibility: trivial
+scope:
+  declared: [docs/package-matrix.md]
+  actual: [docs/package-matrix.md]
+  drift: []
+proof:
+  tests_run: "awk pipe-count table consistency check"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: "Doc only; table column count verified consistent."
+specifications:
+  - "tfsec and Trivy are both installed by infra/install.sh during the migration window; trivy config is the forward path"
+deviations_from_plan: none
+confidence: high
