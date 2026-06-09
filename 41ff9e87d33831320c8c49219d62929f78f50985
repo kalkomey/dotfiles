@@ -1,0 +1,70 @@
+intent: >
+  Modernize EOL runtime/service pins (openssl@1.1, ruby 3.0/3.1, node 13/10,
+  mysql@5.7) and fix Ruby/Node so they work on Ubuntu, not just macOS.
+slice: "4/6"
+kind: fix
+behavior_change: breaking
+reversibility: reversible
+scope:
+  declared:
+    - ruby/install.sh
+    - node/install.sh
+    - databases/install.sh
+    - homebrew/Brewfile
+    - zsh/zshrc.symlink
+  actual:
+    - ruby/install.sh
+    - node/install.sh
+    - databases/install.sh
+    - homebrew/Brewfile
+    - zsh/zshrc.symlink
+  drift: []
+proof:
+  tests_run: "zsh -n on all 4 scripts + zshrc; grep for residual openssl@1.1/mysql@5.7; brew info mysql; zshrc openssl-guard dry test"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No suite. All scripts pass zsh -n. Confirmed no functional openssl@1.1/mysql@5.7
+    references remain (only a doc comment). mysql is a valid formula. Verified the
+    zshrc guard exports openssl@3 paths on this Apple Silicon Mac and exports nothing
+    when no Homebrew openssl@3 prefix exists (Linux-safe). Installers themselves NOT
+    run (ruby/node builds take minutes; Linux needs apt) — VM/fresh-Mac is the gate.
+verification:
+  tested:
+    - "All touched scripts pass zsh -n"
+    - "No residual openssl@1.1 / mysql@5.7 functional references"
+    - "zshrc openssl@3 block exports on macOS, stays silent with no brew prefix (Linux)"
+  manual:
+    - "ruby-install 3.3.6 and nvm install 22 NOT executed; Ubuntu nvm-install path review-only"
+assumptions:
+  - "Ruby 3.3.6 and Node 22.x are appropriate modern baseline defaults; per-repo pins override"
+  - "Ruby 3.3 builds against OpenSSL 3 with no special handling on Ubuntu (apt libssl-dev) or macOS (openssl@3)"
+  - "nvm v0.40.1 installer is current and installs to ~/.nvm on Ubuntu"
+  - "Homebrew `mysql` (8.x) is an acceptable replacement for mysql@5.7 for local tooling"
+specifications:
+  - "Runtime defaults are a baseline only; .ruby-version/.nvmrc per-repo are the source of truth"
+  - "macOS Ruby builds use Homebrew openssl@3; Ubuntu uses apt -dev deps, no Homebrew paths"
+  - "zshrc exports Homebrew build flags ONLY when a real Homebrew openssl@3 prefix exists"
+deviations_from_plan: >
+  "behavior_change is 'breaking': default Ruby/Node/MySQL versions change and the
+  openssl flag block changes — anyone re-running dot gets new default runtimes. This is
+  the intended modernization. Version floors still need confirmation against the apps
+  before merge (flagged in the commit + PR)."
+trade_offs: >
+  "Install a single modern default per runtime rather than the old two-version arrays;
+  legacy versions are installed per-repo via ruby-install/nvm. Kept the openssl flag
+  block fast (dir checks, no per-shell `brew --prefix` fork) at the cost of hardcoding
+  the two Homebrew prefixes."
+self_review:
+  consistency: "ruby/node installers keep the version-array + default + version-file shape; zshrc guard mirrors the pyenv/JAVA_HOME guarded-block style added earlier."
+  error_paths: "ruby-install --no-reinstall is idempotent; nvm loaded before use and installed on Linux if absent; databases brew link has || true."
+  security: "node Linux path uses the official nvm installer pinned to v0.40.1 over https (curl|bash — flagged); no new secret handling."
+  api: "ruby/node/databases install contracts unchanged (same entrypoints); zshrc env exports change (openssl@3, Linux no-export). bin/dot already calls these."
+  dead_code: "Removed the stale mysql2 openssl build hint from ruby/install.sh; no orphans."
+confidence: medium
+reviewer_attention:
+  - "Default versions Ruby 3.3.6 / Node 22 / MySQL 8 — CONFIRM against apps before merge"
+  - "node/install.sh:18-21 — nvm-on-Linux install (curl|bash, v0.40.1), unrun"
+  - "zsh/zshrc.symlink:82-96 — the openssl@3 guard; verify on a real Intel Mac and on Ubuntu that flags are correct/absent"
