@@ -1,13 +1,20 @@
 # Package Matrix
 
-This is the **shared contract** for cross-platform parity between macOS (Apple Silicon)
-and Ubuntu 24.04. It exists so that "which tool, installed how, on which OS, owned by
-whom" is a documented agreement instead of an argument re-litigated in every PR.
+This is the **shared contract** for a **ready-to-work Kalkomey developer machine** on
+macOS (Apple Silicon) and Ubuntu 24.04. It exists so that "which tool, installed how, on
+which OS, owned by whom" is a documented agreement instead of an argument re-litigated in
+every PR.
 
-**Parity is defined by capability, not by package manager.** The two platforms do not use
-the same package manager and are not expected to. They are expected to end up with the
-same core capabilities, compatible runtime versions, and documented platform-specific
-installation paths.
+The goal is a machine that's ready to work, not strict symmetry. Most capabilities are
+**cross-platform** (parity on both OSes). Some are **macOS-only** because the platform
+dictates it (iOS/Swift builds) — those carry `n/a` on the Ubuntu side, and that's
+intentional, not a gap. And some tools are **deliberately out of scope** (legacy
+Windows-only stacks, Dockerized legacy runtimes, per-project toolchains) — recorded below
+so the omission is a decision, not an oversight.
+
+**Parity, where it applies, is defined by capability, not by package manager.** The two
+platforms do not use the same package manager and are not expected to. Where a capability
+exists on both, they should end up with compatible versions via documented per-OS paths.
 
 ## Package ownership rules
 
@@ -69,6 +76,14 @@ The **Version** column states how closely the two platforms must track each othe
 | Node runtime | `nvm` | `nvm` | node | exact | Pin via `.nvmrc` (org standard; 22 repos) |
 | Yarn | Corepack | Corepack | node | major | **Avoid** `apt install yarn` (installs `cmdtest`) |
 | Python runtime | `pyenv` | `pyenv` (+ build deps) | python | exact | Pin via `.python-version`; mirrors the chruby/nvm pattern |
+| JDK | Homebrew `openjdk@17` | apt `openjdk-17-jdk` | jvm | major | Gradle 8.x (hw-android) needs JDK 17+; Gradle bootstraps via wrapper |
+| PHP | Homebrew `php@8.2` | apt `php8.2` | php | major | eRegulations (Craft CMS 4) pins 8.2; legacy PHP stays Dockerized (see below) |
+| Composer | Homebrew `composer` | official installer | php | latest | PHP dependency manager; pairs with the PHP row |
+| .NET SDK | Homebrew `dotnet-sdk` | Microsoft apt repo `dotnet-sdk-8.0` | dotnet | major | **Opt-in / niche** — only the modern cross-platform console/GIS tools; legacy .NET Framework is out (Windows-only) |
+| Xcode | Mac App Store / `xcode-select` | n/a | ios | latest | macOS-only; required for any iOS build |
+| CocoaPods | Homebrew `cocoapods` (or gem) | n/a | ios | major | macOS-only; rides the Ruby runtime |
+| SwiftLint | Homebrew `swiftlint` | n/a | ios | major | macOS-only |
+| Fastlane | gem via Bundler (per-repo) | n/a | ios | major | macOS-only; pinned per-repo in the app's Gemfile, not system-wide |
 | MySQL | Homebrew `mysql` | apt `mysql-server` or MySQL vendor repo | databases | major | In practice apps run it via Docker Compose; native install is for local tooling |
 | PostgreSQL | Homebrew `postgresql` | apt `postgresql` | databases | major | Usually Docker Compose in app boot; native is optional |
 | Redis | Homebrew `redis` | apt `redis-server` | databases | major | Usually Docker Compose in app boot; native is optional |
@@ -89,6 +104,23 @@ The two compose: the dotfiles give you a working machine; a repo may layer devbo
 for its exact tool versions. The dotfiles do not install, wrap, or depend on devbox, and
 devbox is **not** the "Homebrew-on-Linux / cross-platform cleverness" the ownership rules
 push back against — it is deliberately scoped to individual repos, not the shared baseline.
+
+## Out of scope: legacy and single-platform stacks
+
+Recorded so these are decisions, not gaps someone re-litigates later:
+
+- **Legacy .NET Framework** (v4.x — WPF, WinForms, IIS-hosted web: `pos`, `ke_vdp`,
+  FreshAir, `temp_*`) — Windows-only; no macOS/Ubuntu story. Only the modern
+  cross-platform `Microsoft.NET.Sdk` console/GIS tools are covered (the opt-in .NET SDK row).
+- **Legacy PHP** (CakePHP 2.x `register_ed`/`dtx_server`; Symfony `cc-lms`/`cc-csr`/`cc-rest`
+  on PHP ≥5.x floors; WordPress course sites on PHP 7.x) — runs in Docker / legacy hosting.
+  The PHP row targets the modern, actively-maintained line (eRegulations, PHP 8.2) only.
+- **Per-project toolchains** ride their project's package manager, not the shared baseline:
+  PHP `php-cs-fixer`/`PHPUnit` (Composer dev-deps), iOS `fastlane` (Bundler, per-repo
+  Gemfile), Android `gradle` (the wrapper bootstraps itself per-repo), and SDK pins like
+  `global.json`/`.tool-versions` where a repo sets them.
+- **Android SDK command-line tools** — installable cross-platform but app-specific; the
+  JDK row covers the shared system dependency. Add per-project if/when Android dev is local.
 
 ## Keeping this current
 
