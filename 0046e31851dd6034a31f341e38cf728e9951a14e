@@ -1,0 +1,55 @@
+intent: >
+  Add a report-only health check (script/doctor) so "is my machine ready?" is
+  answerable and the VM verification has a shared vocabulary.
+slice: "5/6"
+kind: feature
+behavior_change: additive
+reversibility: trivial
+scope:
+  declared: [script/doctor]
+  actual: [script/doctor]
+  drift: []
+proof:
+  tests_run: "shellcheck script/doctor; actual end-to-end run on macOS (Apple Silicon)"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No suite, but this is the first script in the effort I actually EXECUTED:
+    ran end-to-end on macOS, output is correct (34 ok / 13 miss matching this
+    machine's real state), exit code 1 when items missing. shellcheck clean.
+lint:
+  run: "shellcheck script/doctor"
+  result: clean
+  count: 0
+verification:
+  tested:
+    - "Ran on macOS: all sections render; Ruby/Node/Python detected with versions; Docker running detected; iOS section appears"
+    - "Java false-ok bug found and fixed (macOS /usr/bin/java stub) — runtime() now gates on the version command succeeding"
+    - "Exit code 1 when missing>0, 0 when clean"
+  manual:
+    - "Linux branches (apt-get package-manager check, wl-copy/xclip clipboard, no iOS section) are unrun — simple + shellcheck-clean, confirmed on the Ubuntu VM"
+assumptions:
+  - "Version commands (ruby/node/python3/php --version, java -version) exit 0 when the real runtime is installed"
+  - "nvm presence is detectable via nvm.sh on disk (it's a shell function, not a command)"
+specifications:
+  - "doctor REPORTS ONLY — never installs or fixes"
+  - "Exit 0 iff zero [miss]; otherwise exit 1 (CI-usable)"
+  - "runtime() reports [ok] only when the version command succeeds (defeats macOS's stub java)"
+deviations_from_plan: >
+  "Plan scoped a 'README usage note' into PR 5; folded it into PR 6's README rewrite
+  instead to avoid a throwaway edit + merge churn (PR 1 and PR 6 both touch README).
+  doctor's header comment documents usage in the meantime."
+trade_offs: >
+  "Presence-based checks (command -v) for most tools rather than version-gating each —
+  cheap and good enough for a readiness report; only runtimes show versions and only
+  Java needed exit-status gating."
+self_review:
+  consistency: "Uses the bootstrap-style colored status helpers; section grouping mirrors docs/package-matrix.md and the topic installers."
+  error_paths: "set -u; every check is presence/exit-status based and can't fail destructively; report-only by design."
+  api: "New standalone command (script/doctor); no caller changes."
+confidence: high
+reviewer_attention:
+  - "script/doctor:31-39 — runtime() exit-status gating (the Java-stub fix)"
+  - "Linux clipboard/package-manager branches are unrun (lines guarded by $OS / $WAYLAND_DISPLAY)"
