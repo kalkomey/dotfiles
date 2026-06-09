@@ -59,7 +59,8 @@ The **Version** column states how closely the two platforms must track each othe
 | Consul | Homebrew `consul` | HashiCorp apt repo | infra | major | Client; server behavior differs |
 | Packer | Homebrew `packer` | HashiCorp apt repo | infra | major | Same HashiCorp repo as the above |
 | tflint | Homebrew `tflint` | official install script | infra | major | `~/.tflint.hcl` + `tflint-ruleset-aws`; plugins via per-repo `tflint --init` |
-| tfsec | Homebrew `tfsec` | binary release / install script | infra | major | **Maintenance mode** — Aqua folded it into Trivy; revisit migrating to `trivy config` |
+| tfsec | Homebrew `tfsec` | install script | infra | major | **Maintenance mode** — kept for repos whose pre-commit still calls it |
+| Trivy | Homebrew `trivy` | install script | infra | major | tfsec's successor; `trivy config` covers the ruleset. Installed alongside tfsec during migration |
 | terraform-docs | Homebrew `terraform-docs` | binary release | infra | major | Generates module docs in pre-commit |
 | Ansible | Homebrew `ansible` | `pipx install ansible` | infra | major | `ansible-ke` pins `ansible@2.18.7`; pin via pipx |
 | Docker | Docker Desktop cask | Docker Engine apt repo | docker | major | Linux needs `docker` group / new login |
