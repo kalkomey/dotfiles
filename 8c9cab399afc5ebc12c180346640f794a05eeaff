@@ -1,0 +1,43 @@
+intent: >
+  Confirm PR 4's baseline Ruby/Node versions against kelp's pins and align them so a
+  fresh machine is ready for the primary app out of the box.
+slice: "verification/versions"
+kind: fix
+behavior_change: breaking
+reversibility: trivial
+scope:
+  declared: [ruby/install.sh, node/install.sh]
+  actual: [ruby/install.sh, node/install.sh]
+  drift: []
+proof:
+  tests_run: "read kelp .ruby-version/.nvmrc (local + GitHub API); zsh -n ruby/install.sh node/install.sh"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Confirmed kelp's pins from both the local clone and the GitHub API
+    (.ruby-version=3.4.9, .nvmrc=22.14.0, no .node-version). Bumped defaults to
+    match; both files pass zsh -n. Not re-run on the VM (stopped) — but the install
+    path is identical to the already-verified 3.3.6/22.x run (3.4.9 builds vs OpenSSL 3
+    the same; nvm install 22.14.0 is the same mechanism).
+specifications:
+  - "Dotfiles default Ruby = 3.4.9 and Node = 22.14.0, matching kelp; per-repo version files override"
+  - "kelp confirms .nvmrc (not .node-version) as the Node pin convention"
+assumptions:
+  - "kelp is the right 'primary app' to anchor the baseline defaults to"
+  - "Ruby 3.4.9 and Node 22.14.0 are installable (ruby-install/nvm) — same paths verified for 3.3.6/22.x on the VM"
+deviations_from_plan: >
+  "PR 4 left the versions as a baseline pending app confirmation (behavior_change:
+  breaking). This confirms against kelp and adjusts; lands on PR 7 (already the
+  ruby-touching, empirical-fixes branch) rather than rebasing PR 4 in the stack."
+trade_offs: >
+  "Anchored the single default to kelp specifically rather than a generic 'latest
+  stable' — best for the most-used app; other repos override per-version-file. Did not
+  re-run the VM for the exact numbers (stopped; identical install path)."
+self_review:
+  consistency: "Same version-array shape as before; header notes updated from 'confirm before merge' to the confirmed kelp values."
+  api: "Installer-internal; re-running dot installs the new default runtimes (breaking, intended)."
+confidence: high
+reviewer_attention:
+  - "Defaults now Ruby 3.4.9 / Node 22.14.0 — re-running dot swaps default runtimes; exact numbers not re-run on the VM (identical path to the verified 3.3.6/22.x)"
