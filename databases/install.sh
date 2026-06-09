@@ -12,7 +12,7 @@ OS="$(uname)"
 if [[ "$OS" == "Darwin" ]]; then
   brew_command="$(which brew)"
   echo "Force linking mysql and postgresql for their respective headers"
-  ${brew_command} link --force --overwrite mysql@5.7 || true
+  ${brew_command} link --force --overwrite mysql || true
   ${brew_command} link --force --overwrite postgresql || true
 
 elif [[ "$OS" == "Linux" ]]; then
