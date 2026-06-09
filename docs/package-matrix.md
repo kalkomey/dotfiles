@@ -18,7 +18,7 @@ installation paths.
 - **Ubuntu** uses **official binary installers** when apt is stale, unavailable, or
   known-bad (e.g. AWS CLI v2).
 - **Language runtimes** stay in their topic installers, not the OS package layer: Ruby via
-  `ruby-install`/`chruby`, Node via `nvm`/Corepack.
+  `ruby-install`/`chruby`, Node via `nvm`/Corepack, Python via `pyenv`.
 - **Personal tools do not go in shared installers** — they belong in `.local` files
   (`~/.zshrc.local`, etc.).
 - **Homebrew-on-Linux is allowed only as an explicit exception**, when no acceptable apt,
@@ -43,6 +43,8 @@ The **Version** column states how closely the two platforms must track each othe
 |---|---|---|---|---|---|
 | Git | Homebrew `git` | apt `git` | base | major | Required before most tooling |
 | GitHub CLI | Homebrew `gh` | GitHub official apt repo | base | major | Avoid distro lag |
+| GNU make | Homebrew `make` (+ gnubin PATH) | apt `build-essential` | base | latest | KELP et al. expect GNU make ≥4; macOS ships 3.81 — gnubin makes `make` the brew one |
+| pre-commit | Homebrew `pre-commit` | `pipx install pre-commit` | base | major | Orchestrates terraform_fmt/validate/tflint/tfsec/terraform-docs hooks org-wide |
 | ShellCheck | Homebrew `shellcheck` | apt `shellcheck` | base | major | Used for script review |
 | ripgrep | Homebrew `ripgrep` | apt `ripgrep` | base | major | Shared CLI |
 | fd | Homebrew `fd` | apt `fd-find` (+ `fd` alias) | base | major | Ubuntu binary is `fdfind` |
@@ -55,17 +57,37 @@ The **Version** column states how closely the two platforms must track each othe
 | Vault | Homebrew `vault` | HashiCorp apt repo | infra | major | Client; server behavior differs |
 | Nomad | Homebrew `nomad` | HashiCorp apt repo | infra | major | Client; server behavior differs |
 | Consul | Homebrew `consul` | HashiCorp apt repo | infra | major | Client; server behavior differs |
+| Packer | Homebrew `packer` | HashiCorp apt repo | infra | major | Same HashiCorp repo as the above |
+| tflint | Homebrew `tflint` | official install script | infra | major | `~/.tflint.hcl` + `tflint-ruleset-aws`; plugins via per-repo `tflint --init` |
+| tfsec | Homebrew `tfsec` | binary release / install script | infra | major | **Maintenance mode** — Aqua folded it into Trivy; revisit migrating to `trivy config` |
+| terraform-docs | Homebrew `terraform-docs` | binary release | infra | major | Generates module docs in pre-commit |
+| Ansible | Homebrew `ansible` | `pipx install ansible` | infra | major | `ansible-ke` pins `ansible@2.18.7`; pin via pipx |
 | Docker | Docker Desktop cask | Docker Engine apt repo | docker | major | Linux needs `docker` group / new login |
 | Ruby build deps | Homebrew deps | apt `*-dev` deps | ruby | major | Native build prerequisites |
 | Ruby runtime | `ruby-install` / `chruby` | `ruby-install` / `chruby` | ruby | exact | Same manager both OSes; pin via `.ruby-version` |
-| Node runtime | `nvm` | `nvm` | node | exact | Pin via `.node-version` |
+| Node runtime | `nvm` | `nvm` | node | exact | Pin via `.nvmrc` (org standard; 22 repos) |
 | Yarn | Corepack | Corepack | node | major | **Avoid** `apt install yarn` (installs `cmdtest`) |
-| MySQL | Homebrew `mysql` | apt `mysql-server` or MySQL vendor repo | databases | major | Confirm app compatibility |
-| PostgreSQL | Homebrew `postgresql` | apt `postgresql` | databases | major | Native service management |
-| Redis | Homebrew `redis` | apt `redis-server` | databases | major | Native service management |
-| Memcached | Homebrew `memcached` | apt `memcached` | databases | major | Native service management |
+| Python runtime | `pyenv` | `pyenv` (+ build deps) | python | exact | Pin via `.python-version`; mirrors the chruby/nvm pattern |
+| MySQL | Homebrew `mysql` | apt `mysql-server` or MySQL vendor repo | databases | major | In practice apps run it via Docker Compose; native install is for local tooling |
+| PostgreSQL | Homebrew `postgresql` | apt `postgresql` | databases | major | Usually Docker Compose in app boot; native is optional |
+| Redis | Homebrew `redis` | apt `redis-server` | databases | major | Usually Docker Compose in app boot; native is optional |
+| Memcached | Homebrew `memcached` | apt `memcached` | databases | major | Usually Docker Compose in app boot; native is optional |
 | Clipboard copy | native `pbcopy` | `wl-copy` / `xclip` / stdout | system | n/a | Abstracted in `system/clipboard.zsh` |
 | Clipboard paste | native `pbpaste` | `wl-paste` / `xclip` / message | system | n/a | Abstracted in `system/clipboard.zsh` |
+
+## Out of scope: per-repo toolchains (devbox)
+
+Several infra repos (`terraform-ke-modules`, `numenor`, `atlantis`, `ansible-ke`) use
+[devbox](https://www.jetify.com/devbox) (Nix-based) to pin a per-repo toolchain
+(awscli2, jq, tflint, tfsec, terraform-docs, vault, ansible, packer, …).
+
+**devbox is sanctioned but out of scope for these dotfiles.** It solves a different
+problem — a *reproducible per-repo toolchain*, pinned in `devbox.json` and entered with
+`devbox shell` — than the dotfiles solve, which is the *per-developer OS-native baseline*.
+The two compose: the dotfiles give you a working machine; a repo may layer devbox on top
+for its exact tool versions. The dotfiles do not install, wrap, or depend on devbox, and
+devbox is **not** the "Homebrew-on-Linux / cross-platform cleverness" the ownership rules
+push back against — it is deliberately scoped to individual repos, not the shared baseline.
 
 ## Keeping this current
 
