@@ -1,0 +1,18 @@
+intent: "ruby/node: install ruby-install+chruby from source on Ubuntu; default to kelp's versions (Ruby 3.4.9 / Node 22.14.0)."
+kind: fix
+behavior_change: breaking
+reversibility: reversible
+proof:
+  tests_run: "zsh -n ruby/node install.sh; full VM run"
+  result: green
+verification:
+  tested:
+    - "VM: ruby-install/chruby absent on Ubuntu -> built from source; before, ruby-install was not found AND the script exited 0 (silent, no Ruby). Guard added."
+    - "Ruby 3.4.9 built against OpenSSL 3; Node 22.14.0 installed via nvm — both match kelp's .ruby-version/.nvmrc"
+specifications:
+  - "Ubuntu builds ruby-install+chruby from source if absent; ruby/install.sh hard-fails if ruby-install can't be obtained"
+  - "Default runtimes match kelp (the primary app); per-repo version files override"
+assumptions:
+  - "Ruby 3.4.9 / Node 22.14.0 are kelp's pins (confirmed from kelp .ruby-version=3.4.9, .nvmrc=22.14.0)"
+deviations_from_plan: "Backported from the closed VM-fixes PR (#20) into runtime's home PR (#17). behavior_change: breaking — re-running dot swaps default runtimes."
+confidence: high
