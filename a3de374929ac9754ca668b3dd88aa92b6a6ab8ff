@@ -1,0 +1,56 @@
+intent: >
+  Add a pyenv-managed Python topic mirroring the chruby/nvm pattern, closing the
+  "Python used but unmanaged" gap the repo audit found.
+slice: "2C/6"
+kind: feature
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared:
+    - python/install.sh
+    - homebrew/Brewfile
+    - zsh/zshrc.symlink
+  actual:
+    - python/install.sh
+    - homebrew/Brewfile
+    - zsh/zshrc.symlink
+  drift: []
+proof:
+  tests_run: "zsh -n python/install.sh; zsh -n zsh/zshrc.symlink; brew info pyenv pipx"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No suite in repo; zsh installers gate on zsh -n (shellcheck has no zsh dialect).
+    Verified syntax of the installer and the edited zshrc, and that pyenv/pipx are
+    valid Homebrew formulae. The installer itself was NOT executed (a pyenv build
+    takes minutes and the Linux path needs apt) — real run is the Ubuntu VM step.
+verification:
+  tested:
+    - "python/install.sh and zshrc.symlink pass zsh -n"
+    - "pyenv, pipx are valid Homebrew formulae"
+  manual:
+    - "Installer not run; pyenv build + Linux apt path verified by review only"
+assumptions:
+  - "Python 3.12.8 is a real pyenv-installable release (knowledge cutoff Jan 2026)"
+  - "pyenv.run installer script + the listed apt build deps are current for Ubuntu 24.04"
+  - "`pyenv init - zsh` is supported by the pyenv versions Homebrew/pyenv.run ship"
+specifications:
+  - "Python is pinned per-repo via .python-version; the topic installs one default global (3.12.8) and writes ~/.python-version"
+  - "pipx (not pyenv) provides python CLI tools; pre-commit/ansible install via pipx in the infra topic"
+  - "zshrc pyenv init is guarded by `command -v pyenv` / `~/.pyenv` presence — no effect if pyenv absent"
+deviations_from_plan: none
+trade_offs: >
+  "Mirrors ruby/install.sh (version array + default + version file) for consistency
+  rather than inventing a new shape. Uses the official curl pyenv.run | bash on Linux
+  — the documented install path — accepting a remote-script pipe over vendoring."
+self_review:
+  consistency: "Array+default+version-file mirrors ruby/install.sh; Brewfile '# Python' section matches the existing section style; zshrc pyenv block guarded like the nvm/chruby blocks above it."
+  error_paths: "set -e throughout; brew-missing on macOS and unsupported-OS both exit 1; pipx ensurepath is best-effort (|| true)."
+  security: "Linux path runs `curl -fsSL https://pyenv.run | bash` — the official pyenv installer, but a remote-script pipe; flagged for attention."
+  api: "New topic installer; zshrc gains a guarded pyenv init (additive). Not yet called by bin/dot (PR 3)."
+confidence: medium
+reviewer_attention:
+  - "python/install.sh:36 — `curl pyenv.run | bash` on Linux (official installer, but remote pipe)"
+  - "python/install.sh:8 — the 3.12.8 default pin; bump if a newer 3.12.x is preferred"
