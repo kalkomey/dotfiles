@@ -1,51 +1,91 @@
-## dotfiles
+# Kalkomey dotfiles
 
-Kalkomey's dotfiles based on [Zach Holman](https://github.com/holman)'s [dotfiles](https://github.com/holman/dotfiles) philosophy. However, there's plenty of stuff from [Hashrocket](https://github.com/hashrocket)'s [dotmatrix](https://github.com/hashrocket/dotmatrix).
+A **ready-to-work Kalkomey developer machine** on macOS (Apple Silicon) and Ubuntu
+24.04. One clone, one bootstrap, and you have the shell, tools, runtimes, and config the
+team uses. Based on [Zach Holman](https://github.com/holman)'s
+[dotfiles](https://github.com/holman/dotfiles) and Hashrocket's
+[dotmatrix](https://github.com/hashrocket/dotmatrix), adapted into a shared, centrally
+managed repo.
 
-## install
+This is **one shared repo everyone tracks** — not a personal fork. Tweaks that are just
+for you go in untracked `.local` files; changes for the whole team go through a PR. See
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-Run this:
+## Install
 
 ```sh
-git clone https://github.com/kalkomey/dotfiles.git ~/.dotfiles
+git clone git@github.com:kalkomey/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 script/bootstrap
 ```
 
-This will symlink the appropriate files in `.dotfiles` to your home directory.
-Everything is configured and tweaked within `~/.dotfiles`.
+`bootstrap` sets up your git identity and SSH key, symlinks the config files into your
+home directory, and then runs `bin/dot` to install everything.
 
-The main file you'll want to change right off the bat is `zsh/zshrc.symlink`,
-which sets up a few paths that'll be different on your particular machine.
+## The three commands
 
-`dot` is a simple script that installs some dependencies, sets sane OS X
-defaults, and so on. Tweak this script, and occasionally run `dot` from
-time to time to keep your environment fresh and up-to-date. You can find
-this script in `bin/`.
+| Command | What it does |
+|---|---|
+| `script/bootstrap` | One-time setup: git identity, SSH key, symlinks, then `dot`. |
+| `bin/dot` | Install/update everything. **Run it periodically** to stay current. OS-aware: Homebrew on macOS, apt/vendor repos on Ubuntu. |
+| `script/doctor` | Report what's installed vs. missing. **Never installs or fixes** — just tells you if your machine is ready. |
 
-## custom install
+## How it works
 
-If you are using an alternative shell like fish, or alternative version manager software like asdf, some of the commands might not be a good fit for you. You might also want to ignore certain aliases or osx configuration changes to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`. You might also need some of the workarounds like the ones for mysql described in `ruby/install.sh`.
+Everything is organized by **topic** — one directory per area (`git/`, `tmux/`, `ruby/`,
+`infra/`, …). Within a topic:
 
-## topical
+- `*.zsh` files are **auto-sourced** into your shell (aliases, config, functions).
+- `*.symlink` files are **symlinked** into `$HOME` without the extension
+  (`git/gitconfig.symlink` → `~/.gitconfig`).
+- `install.sh` is run by `dot` to install that topic's dependencies; it branches per-OS.
+- `bin/` is on your `$PATH`, so its scripts are available as commands.
 
-Everything's built around topic areas. If you're adding a new area to your
-forked dotfiles — say, "Java" — you can simply add a `java` directory and put
-files in there. Anything with an extension of `.zsh` will get automatically
-included into your shell. Anything with an extension of `.symlink` will get
-symlinked without extension into `$HOME` when you run `script/bootstrap`.
+Which tool comes from where (Homebrew vs apt vs a vendor repo vs a binary installer) is
+documented in **[docs/package-matrix.md](docs/package-matrix.md)** — the shared contract.
+Parity is by capability, not by package manager: macOS uses Homebrew; Ubuntu uses
+apt / vendor apt repos / official installers. A few capabilities are macOS-only (iOS), and
+some legacy stacks are deliberately out of scope — all recorded in the matrix.
 
-## what's inside
+Cross-OS niceties are handled for you: clipboard access (`pbcopy`/`pbpaste`, the `pubkey`
+helper, tmux copy) works the same via `system/clipboard.zsh` (native on macOS,
+`wl-clipboard` on Wayland, `xclip` on X11).
 
-A lot of what's inside is just aliases: `gst` for `git status`, `gpr` for `git
-pull --rebase --prune`, for example. You can browse the `aliases.zsh` files in
-each topic directory. There's also a collection of scripts in `bin` you can
-browse.
+## Where your personal changes go
 
-## thanks
+**If a change helps only you, put it in a `.local` file. If it helps the team, open a
+PR.** The `.local` files are untracked and sourced automatically, so they survive
+`git pull`:
 
-I forked [Zach Holman](http://github.com/holman)'s
-[dotfiles](http://github.com/holman/dotfiles) and basically adopted his philosophy
-but made it work with my preferred environment tools.
-A decent amount of the code in these dotfiles stems either from Hashrocket's Dotmatrix, Holman's dotfiles or by extension,
-Ryan Bates' original dotfiles.
+| File | For |
+|---|---|
+| `~/.zshrc.local` | Personal shell exports, aliases, paths, prompt tweaks |
+| `~/.gitconfig.local` | Your git identity and personal git preferences |
+| `~/.tmux.conf.local` | Personal tmux overrides |
+| `~/.vimrc.local` | Personal vim overrides |
+| `.mux` (per project) | Project tmux session layout |
+
+Don't edit the tracked `*.symlink`/`*.zsh` files for personal preferences — that's what
+`.local` is for. Editing tracked files is for changes you intend to PR for everyone.
+
+## Staying current
+
+```sh
+cd ~/.dotfiles && git pull && bin/dot && script/doctor
+```
+
+## Contributing
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** — how to make a local change vs. a shared
+change, the topic conventions, the package-matrix contract, and the PR flow.
+
+## Linux desktop (Phase 2)
+
+A Hyprland/Wayland desktop layer for Ubuntu is planned but **not yet built** — see
+**[PHASE2-DESKTOP.md](PHASE2-DESKTOP.md)**.
+
+## Thanks
+
+Forked from [Zach Holman](http://github.com/holman)'s
+[dotfiles](http://github.com/holman/dotfiles); much also stems from Hashrocket's Dotmatrix
+and, by extension, Ryan Bates' original dotfiles.
