@@ -184,9 +184,10 @@ install_dotfiles () {
 }
 
 
-fd=0 # stdin
-# Set up gitconfig.local only in an interactive shell
-if [[ -t "$fd" || -p /dev/stdin ]]; then
+# Set up gitconfig.local only when we're actually interactive (a real terminal on
+# stdin). The old `-p /dev/stdin` check also fired under pipes, which ran the
+# interactive prompts during automated/non-interactive provisioning and aborted.
+if [ -t 0 ]; then
   setup_gitconfig_local
 fi
 
@@ -199,6 +200,26 @@ then
 else
   fail "error installing dependencies"
 fi
+
+# Make zsh the login shell — it's the dotfiles' shell. zsh is installed by the
+# package step (on Linux); macOS already defaults to zsh, so this no-ops there.
+# Uses `sudo chsh` so it works without prompting in automated runs too. Non-fatal.
+zsh_path="$(command -v zsh || true)"
+case "${SHELL:-}" in
+  */zsh) ;;
+  *)
+    if [ -n "$zsh_path" ]; then
+      if ! grep -qx "$zsh_path" /etc/shells 2>/dev/null; then
+        echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null || true
+      fi
+      if sudo chsh -s "$zsh_path" "$USER"; then
+        success "login shell set to zsh (open a new terminal to use it)"
+      else
+        echo "  (could not change login shell automatically — run: chsh -s $zsh_path)"
+      fi
+    fi
+    ;;
+esac
 
 echo
 echo '  All installed!'
