@@ -1,0 +1,43 @@
+intent: >
+  Make the repo legible and contributable: rewrite the README for the shared model
+  and add CONTRIBUTING + the deferred-desktop notes. Final planned slice.
+slice: "6/6"
+kind: chore
+behavior_change: none
+reversibility: trivial
+scope:
+  declared: [README.md, CONTRIBUTING.md, PHASE2-DESKTOP.md]
+  actual: [README.md, CONTRIBUTING.md, PHASE2-DESKTOP.md]
+  drift: []
+proof:
+  tests_run: "markdown table column-consistency check; link-target presence check"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Docs only. Verified table consistency across all three files and audited the
+    internal links — two (docs/package-matrix.md, system/clipboard.zsh) live on sibling
+    branches and resolve on merge to master; the rest are present.
+specifications:
+  - "Repo is documented as one shared centrally-managed repo: personal tweaks -> .local files, team changes -> PR"
+  - "CONTRIBUTING codifies the package-matrix-in-same-PR rule, OS-guard + idempotency expectations, and the shellcheck/doctor/both-platforms quality bar"
+  - "The Hyprland desktop is recorded as deferred Phase 2 (documented, not built)"
+assumptions:
+  - "The Phase 2 stack (cpiber PPA Hyprland 0.54.x, waybar/fuzzel/kitty/mako/etc.) is still the current best path on 24.04"
+deviations_from_plan: >
+  "Folded PR 5's deferred 'README usage note' for script/doctor into this rewrite (the
+  three-commands table). Subsumes PR 1's small README cross-platform note — when PR 1
+  and PR 6 both merge, this full rewrite supersedes that paragraph (expect a trivial
+  README conflict to resolve in favor of this version)."
+trade_offs: >
+  "Wrote the docs for the final merged-master state rather than the branch in isolation,
+  so two links point at files on sibling branches. Chose a full README rewrite over an
+  incremental edit because the old framing (personal fork, 'edit zshrc.symlink') is
+  actively wrong for the shared model."
+self_review:
+  consistency: "README/CONTRIBUTING repeat one mental model (local=.local, team=PR) verbatim; matrix/quality rules mirror docs/package-matrix.md."
+  api: "Docs only; no code or interface change."
+confidence: high
+reviewer_attention:
+  - "README.md + CONTRIBUTING.md links to docs/package-matrix.md and system/clipboard.zsh resolve only after the stack merges to master"
