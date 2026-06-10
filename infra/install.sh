@@ -11,18 +11,21 @@
 set -e
 
 OS="$(uname)"
-ANSIBLE_VERSION=2.18.7          # floor from ansible-ke
+# ansible-ke pins "ansible@2.18.7" — that's the ansible-CORE version (the engine).
+# The PyPI `ansible` bundle uses different numbers (9.x/10.x/…), so pin ansible-core.
+ANSIBLE_CORE_VERSION=2.18.7
 TERRAFORM_DOCS_VERSION=0.19.0   # no apt/installer-script; pinned release tarball
+TFLINT_VERSION=0.63.1           # pinned binary; its install script is deprecated
 
-# pre-commit (latest) and ansible (pinned) via pipx. Idempotent.
+# pre-commit (latest) and ansible-core (pinned) via pipx. Idempotent.
 install_pipx_tools() {
   if ! command -v pipx >/dev/null 2>&1; then
     echo "infra/install.sh: pipx not found — run python/install.sh first" >&2
     exit 1
   fi
   pipx install pre-commit 2>/dev/null || pipx upgrade pre-commit || true
-  pipx install "ansible==${ANSIBLE_VERSION}" 2>/dev/null \
-    || pipx install --force "ansible==${ANSIBLE_VERSION}" || true
+  pipx install "ansible-core==${ANSIBLE_CORE_VERSION}" 2>/dev/null \
+    || pipx install --force "ansible-core==${ANSIBLE_CORE_VERSION}" || true
 }
 
 if [[ "$OS" == "Darwin" ]]; then
@@ -38,10 +41,22 @@ if [[ "$OS" == "Darwin" ]]; then
 elif [[ "$OS" == "Linux" ]]; then
   arch="$(dpkg --print-architecture)"   # amd64 | arm64
 
-  # tflint, tfsec, trivy: official install scripts (fetch latest, install to
-  # /usr/local/bin). These are remote-script pipes — the documented install path.
-  curl -fsSL https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-  curl -fsSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+  # tflint: pinned release binary. (Its install_linux.sh is deprecated — it warns
+  # it will be removed and advises against running unpinned downloaded scripts.)
+  tmp_tf="$(mktemp -d)"
+  curl -fsSL "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_${arch}.zip" \
+    -o "${tmp_tf}/tflint.zip"
+  unzip -q "${tmp_tf}/tflint.zip" -d "$tmp_tf"
+  sudo install -m 0755 "${tmp_tf}/tflint" /usr/local/bin/tflint
+  rm -rf "$tmp_tf"
+
+  # tfsec: best-effort. It's archived (folded into Trivy) and its release assets are
+  # unreliable (e.g. no arm64), so a failure here must NOT abort the rest of infra —
+  # trivy below is the supported successor.
+  curl -fsSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash \
+    || echo "infra/install.sh: tfsec install failed (deprecated — Trivy covers it); skipping" >&2
+
+  # trivy: official install script (install to /usr/local/bin).
   curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
     | sudo sh -s -- -b /usr/local/bin
 
