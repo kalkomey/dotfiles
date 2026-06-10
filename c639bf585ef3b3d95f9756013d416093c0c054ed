@@ -1,0 +1,14 @@
+intent: "php: install php8.2 via ppa:ondrej/php — noble ships PHP 8.3, so apt can't find 8.2."
+kind: fix
+behavior_change: additive
+reversibility: reversible
+proof:
+  tests_run: "zsh -n php/install.sh; VM run"
+  result: green
+verification:
+  tested:
+    - "VM: php8.2 not in noble apt (exit 100) -> ondrej PPA -> PHP 8.2.31 + Composer 2.10.1 install"
+specifications:
+  - "Ubuntu PHP 8.2 comes from ppa:ondrej/php"
+deviations_from_plan: "Backported from the closed VM-fixes PR (#20) into php's home PR (#15)."
+confidence: high
