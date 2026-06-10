@@ -1,0 +1,66 @@
+intent: >
+  Wire bin/dot into a single OS-aware orchestration of all topic installers, and
+  give docker/databases real Ubuntu branches — making the stack runnable end-to-end.
+slice: "3/6"
+kind: feature
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared:
+    - bin/dot
+    - docker/install.sh
+    - databases/install.sh
+  actual:
+    - bin/dot
+    - docker/install.sh
+    - databases/install.sh
+  drift: []
+proof:
+  tests_run: "sh -n bin/dot; zsh -n docker/install.sh databases/install.sh; shellcheck -s sh bin/dot; dry dispatch/ordering check"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No suite. bin/dot shellcheck-clean (sh); docker/databases pass zsh -n. Verified
+    the run() ordering (python before infra) and the macOS-only guards (defaults,
+    iOS) via a dry dispatch. The real flow was NOT executed (it installs Docker
+    Engine, apt packages, brew casks) — end-to-end is the Ubuntu VM / fresh-Mac step.
+lint:
+  run: "shellcheck -s sh bin/dot"
+  result: clean
+  count: 0
+verification:
+  tested:
+    - "bin/dot shellcheck-clean; docker/databases zsh -n clean"
+    - "Step ordering and macOS-only guards verified by dry dispatch"
+  manual:
+    - "Full bin/dot run NOT executed (installs real packages) — VM/fresh-Mac is the gate"
+assumptions:
+  - "Invoking installers with `zsh`/`bash`/`sh` explicitly (not the executable bit) is correct and portable"
+  - "Docker apt repo + docker group is the right Ubuntu Docker path; group needs a re-login"
+  - "apt mysql-server/postgresql/redis-server/memcached is the intended Ubuntu DB strategy (systemd)"
+specifications:
+  - "bin/dot order: packages -> macOS defaults(mac) -> ruby -> python -> node -> infra -> jvm -> php -> docker -> databases -> ios(mac) -> vim"
+  - "Each step runs in its own interpreter; a failed step reports and continues (does not abort the run)"
+  - "iOS and macOS-defaults steps are guarded Darwin-only"
+deviations_from_plan: >
+  "Fixed a latent bug while here (DNA-adjacent but worth calling out): the old bin/dot
+  ran zsh installers via `sh`, mis-running zsh array indexing. Now each is invoked with
+  its correct interpreter. Plan scope (bin/dot + docker + databases) otherwise unchanged."
+trade_offs: >
+  "Chose resilient orchestration (report-and-continue per step) over fail-fast so one
+  broken installer doesn't block the rest during this transitional period — at the cost
+  of a failed step being easy to miss in long output. Left ruby/node Ubuntu breakage to
+  PR 4 (runtime modernization) rather than expanding this slice."
+self_review:
+  consistency: "docker/databases mirror the per-OS branch shape of the other topic installers; bin/dot keeps the #!/bin/sh + DOTHOME export convention."
+  error_paths: "run() swallows per-step failure with a visible '!! failed' line; docker/db installers set -e and exit 1 on unsupported OS / missing Homebrew."
+  security: "Docker apt key fetched over https into /etc/apt/keyrings with signed-by= in the source line; no unsigned apt."
+  api: "bin/dot is the public entrypoint (sourced by script/bootstrap); same source contract, expanded steps. No signature change."
+  dead_code: "Old Darwin/Linux case/esac in bin/dot replaced wholesale; nothing orphaned."
+confidence: medium
+reviewer_attention:
+  - "bin/dot:30-46 — the step list/order and per-step interpreter; this is the load-bearing orchestration"
+  - "On Ubuntu, ruby + node steps will fail until PR 4 (openssl@1.1 paths / no nvm-on-Linux) — expected, flagged"
+  - "docker/install.sh:20-34 — Ubuntu Docker repo + group add, unrun"
