@@ -1,0 +1,16 @@
+intent: "bin/dot: track failed steps and return non-zero so a swallowed step failure no longer reads as success."
+kind: fix
+behavior_change: additive
+reversibility: reversible
+proof:
+  tests_run: "sh -n + shellcheck bin/dot; VM run"
+  result: green
+verification:
+  tested:
+    - "VM exposed it: infra failed but bin/dot reported DOTEXIT=0 (run() swallowed it). Now records failed steps, prints a summary, returns non-zero (sourcing-safe — bootstrap's `if source bin/dot` still works)"
+specifications:
+  - "bin/dot returns non-zero if any step fails; no `exit` so sourcing is safe"
+deviations_from_plan: "Backported from the closed VM-fixes PR (#20) into bin/dot's home PR (#16)."
+confidence: high
+reviewer_attention:
+  - "bin/dot: failed_steps summary + trailing `[ -z \"$failed_steps\" ]` as the sourcing-safe status"
