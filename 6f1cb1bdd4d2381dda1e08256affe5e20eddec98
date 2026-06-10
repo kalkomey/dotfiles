@@ -1,0 +1,18 @@
+intent: "infra: fix ansible spec, pin tflint, make tfsec best-effort — all surfaced by the Ubuntu VM run."
+kind: fix
+behavior_change: additive
+reversibility: reversible
+proof:
+  tests_run: "zsh -n infra/install.sh; VM re-run of infra/install.sh"
+  result: green
+verification:
+  tested:
+    - "ansible==2.18.7 was invalid (it's ansible-CORE) -> ansible-core==2.18.7 installs on VM"
+    - "tflint deprecated install script -> pinned binary; verified download+run on arm64"
+    - "tfsec archived (no arm64 binary) aborted infra under set -e -> best-effort; trivy (successor) installs regardless"
+specifications:
+  - "tfsec is best-effort and never aborts infra; trivy is the supported path"
+deviations_from_plan: "Backported from the closed VM-fixes PR (#20) into infra's home PR (#14)."
+confidence: high
+reviewer_attention:
+  - "infra/install.sh: tfsec best-effort + pinned tflint (VM-verified, arm64)"
