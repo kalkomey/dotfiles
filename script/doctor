@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+#
+# doctor
+#
+# Reports on the health of a Kalkomey dev machine against docs/package-matrix.md.
+# It REPORTS ONLY — it never installs or fixes anything. Run it after bootstrap/dot,
+# during onboarding, or when something feels off:
+#
+#   script/bootstrap   # one-time setup
+#   bin/dot            # install/update everything
+#   script/doctor      # check what's present
+#
+# Exit code: 0 if nothing is missing, 1 if any [miss] was reported.
+
+set -u
+
+OS="$(uname)"
+pass=0; warn=0; fail=0
+
+section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
+ok()   { printf '  \033[32m[ ok ]\033[0m %s\n' "$1"; pass=$((pass + 1)); }
+note() { printf '  \033[33m[note]\033[0m %s\n' "$1"; warn=$((warn + 1)); }
+miss() { printf '  \033[31m[miss]\033[0m %s\n' "$1"; fail=$((fail + 1)); }
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# present "Label" cmd [alt-cmd...] — ok if any of the commands is on PATH.
+present() {
+  local label=$1; shift
+  local c
+  for c in "$@"; do
+    if have "$c"; then ok "${label} (${c})"; return 0; fi
+  done
+  miss "${label} — none of: $*"
+  return 1
+}
+
+# runtime "Label" cmd "version-flag" — ok + version line only if the version
+# command actually succeeds (so macOS's stub /usr/bin/java doesn't read as ok).
+runtime() {
+  local label=$1 cmd=$2 flag=$3 out
+  if out="$("$cmd" "$flag" 2>&1)" && [ -n "$out" ]; then
+    ok "${label}: $(printf '%s\n' "$out" | head -1)"
+  else
+    miss "${label} — ${cmd} not found or not working"
+  fi
+}
+
+section "Platform"
+ok "OS: ${OS} ($(uname -m))"
+case "$OS" in
+  Darwin) present "Package manager" brew ;;
+  Linux)  present "Package manager" apt-get ;;
+esac
+
+section "Shell"
+present "zsh" zsh
+case "${SHELL:-}" in
+  */zsh) ok "default shell is zsh" ;;
+  *)     note "default shell is ${SHELL:-unknown} (expected zsh)" ;;
+esac
+for f in .zshrc.local .gitconfig.local .tmux.conf.local .vimrc.local; do
+  [ -f "$HOME/$f" ] && note "local override present: ~/$f"
+done
+
+section "Clipboard"
+if [ "$OS" = "Darwin" ]; then
+  present "clipboard" pbcopy
+elif [ -n "${WAYLAND_DISPLAY:-}" ]; then
+  present "clipboard (Wayland)" wl-copy xclip
+else
+  present "clipboard (X11)" xclip xsel
+fi
+
+section "Core CLI"
+present "git" git
+present "GitHub CLI" gh
+present "jq" jq
+present "ripgrep" rg
+present "fd" fd fdfind
+present "fzf" fzf
+present "shellcheck" shellcheck
+present "the_silver_searcher" ag
+present "gpg" gpg
+present "make" make gmake
+
+section "Runtimes"
+runtime "Ruby" ruby --version
+present "ruby-install / chruby" ruby-install
+runtime "Node" node --version
+if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ] || [ -s "/opt/homebrew/opt/nvm/nvm.sh" ]; then
+  ok "nvm present"
+else
+  miss "nvm — not found"
+fi
+runtime "Python" python3 --version
+present "pyenv" pyenv
+present "pipx" pipx
+runtime "Java (JDK)" java -version
+runtime "PHP" php --version
+present "Composer" composer
+
+section "Infrastructure"
+present "Terraform" terraform
+present "Vault" vault
+present "Nomad" nomad
+present "Consul" consul
+present "Packer" packer
+present "tflint" tflint
+present "tfsec" tfsec
+present "trivy" trivy
+present "terraform-docs" terraform-docs
+present "pre-commit" pre-commit
+present "ansible" ansible
+
+section "Cloud"
+present "AWS CLI" aws
+present "aws-vault" aws-vault
+
+section "Docker"
+if have docker; then
+  if docker info >/dev/null 2>&1; then
+    ok "docker: running ($(docker --version 2>/dev/null))"
+  else
+    note "docker installed but not responding (daemon down, or 'docker' group needs a new login)"
+  fi
+else
+  miss "docker — not found"
+fi
+
+section "Databases"
+present "MySQL client" mysql
+present "PostgreSQL client" psql
+present "Redis client" redis-cli
+present "Memcached" memcached
+
+if [ "$OS" = "Darwin" ]; then
+  section "iOS (macOS only)"
+  if xcode-select -p >/dev/null 2>&1; then ok "Xcode Command Line Tools"; else miss "Xcode Command Line Tools — run xcode-select --install"; fi
+  present "CocoaPods" pod
+  present "SwiftLint" swiftlint
+fi
+
+section "Summary"
+printf '  \033[32m%d ok\033[0m, \033[33m%d note\033[0m, \033[31m%d missing\033[0m\n' "$pass" "$warn" "$fail"
+[ "$fail" -eq 0 ] || printf '  Run \033[1mbin/dot\033[0m to install what is missing.\n'
+
+[ "$fail" -eq 0 ]
