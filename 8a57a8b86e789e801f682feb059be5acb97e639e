@@ -1,0 +1,65 @@
+intent: >
+  Add the infra/ topic (tflint/tfsec/trivy/terraform-docs/packer/pre-commit/ansible)
+  the repo audit found in heavy use, owned per docs/package-matrix.md.
+slice: "2D/6"
+kind: feature
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared:
+    - infra/install.sh
+    - homebrew/Brewfile
+    - script/packages/ubuntu.sh
+  actual:
+    - infra/install.sh
+    - homebrew/Brewfile
+    - script/packages/ubuntu.sh
+  drift: []
+proof:
+  tests_run: "zsh -n infra/install.sh; bash -n + shellcheck script/packages/ubuntu.sh; brew info on the new formulae"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    No suite; zsh -n on infra/install.sh, shellcheck clean on ubuntu.sh. Verified
+    pre-commit/tfsec/trivy/terraform-docs/ansible/packer are valid core formulae;
+    tflint needs the terraform-linters/tap (Brewfile now taps it + uses the
+    qualified name). infra/install.sh's Linux path was NOT executed (needs apt) —
+    real run is the Ubuntu VM step.
+lint:
+  run: "shellcheck script/packages/ubuntu.sh"
+  result: clean
+  count: 0
+verification:
+  tested:
+    - "infra/install.sh passes zsh -n; ubuntu.sh shellcheck clean"
+    - "6 infra formulae valid in homebrew/core; tflint resolved via terraform-linters/tap"
+  manual:
+    - "Linux install paths (curl|bash scripts, terraform-docs tarball, pipx) reviewed only, not run"
+assumptions:
+  - "tflint/tfsec/trivy official install scripts are current and install to /usr/local/bin"
+  - "terraform-docs v0.19.0 release tarball exists for linux-amd64 and linux-arm64"
+  - "ansible 2.18.7 installs cleanly via pipx on the managed Python"
+  - "terraform-linters/tap is the correct Homebrew tap for tflint (confirmed by brew's own error message)"
+specifications:
+  - "packer is the only infra tool installed via the HashiCorp apt repo (in ubuntu.sh); the rest live in infra/install.sh"
+  - "Both tfsec and trivy are installed (migration window)"
+  - "pre-commit + ansible install via pipx on Linux (from python/install.sh), via Homebrew on macOS"
+deviations_from_plan: none
+trade_offs: >
+  "Linux uses the tools' official curl|bash install scripts (tflint/tfsec/trivy)
+  rather than vendoring binaries — the documented path, at the cost of remote-script
+  pipes. terraform-docs has no install script, so it's a pinned release tarball
+  (bump TERRAFORM_DOCS_VERSION to update). macOS installs defensively via brew even
+  though the Brewfile already declares these, so the topic is runnable standalone."
+self_review:
+  consistency: "infra/install.sh mirrors the docker/databases per-OS branch shape; Brewfile sections match existing grouping; packer added to the existing HashiCorp apt helper rather than a new path."
+  error_paths: "set -e; pipx-missing and brew-missing and unsupported-OS all exit 1; mktemp dir cleaned for terraform-docs."
+  security: "Three official install scripts piped to bash/sh (flagged); terraform-docs tarball over https to a mktemp dir then installed with mode 0755; trivy script pinned to /usr/local/bin."
+  api: "New topic installer; Brewfile additions; ubuntu.sh hashicorp helper gains packer. Not yet called by bin/dot (PR 3)."
+confidence: medium
+reviewer_attention:
+  - "infra/install.sh:48-52 — three curl|bash official installers (tflint/tfsec/trivy) on Linux"
+  - "infra/install.sh:13 — terraform-docs pinned at 0.19.0 (no install script); confirm/bump"
+  - "homebrew/Brewfile:7,68 — tflint via terraform-linters/tap; brew bundle taps then installs"
