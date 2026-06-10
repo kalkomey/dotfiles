@@ -1,0 +1,52 @@
+intent: >
+  Fix two issues a full from-scratch bin/dot VM run exposed: tfsec aborting the
+  whole infra step, and bin/dot masking a failed step as success.
+slice: "verification/run2"
+kind: fix
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared: [infra/install.sh, bin/dot]
+  actual: [infra/install.sh, bin/dot]
+  drift: []
+proof:
+  tests_run: "sh -n + shellcheck bin/dot; zsh -n infra/install.sh; re-ran infra/install.sh on the VM (exit 0, 5/6 tools, tfsec skipped); full doctor 39 ok"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Empirically re-tested on the VM: infra now exits 0 with tfsec skipped and
+    trivy/terraform-docs/pre-commit/ansible all installed; bin/dot shellcheck-clean
+    with the new failure tracking. The bin/dot non-zero-on-failure path is verified by
+    logic + shellcheck (the green re-run no longer triggers it).
+lint:
+  run: "shellcheck -s sh bin/dot"
+  result: clean
+  count: 0
+verification:
+  tested:
+    - "infra/install.sh re-run on VM: exit 0, tfsec best-effort skip, other 5 tools present"
+    - "Final doctor on VM after a full from-scratch bin/dot: 39 ok / 3 note / 2 missing (tfsec, aws-vault)"
+    - "bin/dot sh -n + shellcheck clean"
+  manual:
+    - "bin/dot's failed-step summary + non-zero return verified by reading/shellcheck, not by forcing a failure in this run"
+specifications:
+  - "tfsec is best-effort on Linux (deprecated; trivy is the supported path) — its failure never aborts infra"
+  - "bin/dot records failed steps, prints a summary, and returns non-zero if any failed; sourcing-safe (no exit)"
+deviations_from_plan: >
+  "Second batch of empirical fixes, same rationale as the first (#20): keep VM-run
+  findings together on the verification PR rather than rebasing the home branches.
+  bin/dot belongs to #16, infra to #14/#20."
+trade_offs: >
+  "tfsec best-effort (vs dropping it) honors the 'install both tfsec+trivy' decision while
+  surviving tfsec's archival. bin/dot returns non-zero on any failure — bootstrap will now
+  report 'error installing dependencies' if a step fails, which is correct but louder."
+self_review:
+  consistency: "tfsec `|| echo` matches the best-effort pattern used for optional steps; bin/dot failure-tracking is plain POSIX sh, sourcing-safe like the rest of the script."
+  error_paths: "This commit IS about error paths: stops one optional tool from cascading, and stops a real failure from reading as success."
+  api: "bin/dot now returns non-zero when a step fails (was always ~0). Callers: `dot` directly, and bootstrap's `if source bin/dot` — both handle non-zero correctly."
+confidence: high
+reviewer_attention:
+  - "bin/dot:48-58 — failed_steps summary + the trailing `[ -z \"$failed_steps\" ]` as the sourcing-safe exit status"
+  - "infra/install.sh:53-57 — tfsec best-effort; confirm you still want tfsec attempted at all given it's archived"
