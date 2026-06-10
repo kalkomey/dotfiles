@@ -1,0 +1,14 @@
+intent: "ubuntu.sh: install zsh — every topic installer is #!/usr/bin/env zsh and bin/dot invokes them with zsh."
+kind: fix
+behavior_change: additive
+reversibility: trivial
+proof:
+  tests_run: "bash -n + shellcheck ubuntu.sh; full Ubuntu 24.04 VM run"
+  result: green
+verification:
+  tested:
+    - "VM: zsh absent on fresh Ubuntu broke the installer chain; after this fix all topic installers run"
+specifications:
+  - "ubuntu.sh installs zsh (the dotfiles' shell)"
+deviations_from_plan: "Backported from the closed VM-fixes PR (#20) into ubuntu.sh's home PR (#12)."
+confidence: high
