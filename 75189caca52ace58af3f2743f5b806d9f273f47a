@@ -1,0 +1,50 @@
+intent: >
+  Fix the two bootstrap rough edges the VM run exposed: non-interactive prompt-abort
+  and the missing zsh login-shell, so a fresh machine is actually ready to work.
+slice: "verification/bootstrap-polish"
+kind: fix
+behavior_change: additive
+reversibility: reversible
+scope:
+  declared: [script/bootstrap]
+  actual: [script/bootstrap]
+  drift: []
+proof:
+  tests_run: "bash -n + shellcheck script/bootstrap; VM: guard non-interactive skip test + sudo chsh shell-change test"
+  result: green
+  failing: 0
+tests:
+  needed: "no"
+  rationale: >
+    Verified on the Ubuntu VM: `[ -t 0 ]` reports non-interactive (setup skipped) under
+    limactl shell, and the chsh block changes the login shell /bin/bash -> /usr/bin/zsh
+    via sudo (no password prompt). bash -n clean; shellcheck adds no new findings (the
+    SC2059/SC2166/etc. are pre-existing in untouched helpers/link_file).
+verification:
+  tested:
+    - "Guard: [ -t 0 ] false in non-interactive run -> setup_gitconfig_local skipped"
+    - "chsh: getent passwd shows /usr/bin/zsh after the block"
+  manual:
+    - "Interactive path (real TTY prompts) unchanged — not re-walked; only the guard condition changed"
+specifications:
+  - "Interactive git/SSH setup runs only when stdin is a real terminal ([ -t 0 ])"
+  - "zsh is set as the login shell via sudo chsh when not already zsh; macOS no-ops; failure is non-fatal"
+assumptions:
+  - "sudo is available (bootstrap/dot already require it) so `sudo chsh` needs no password"
+  - "zsh is installed before this point — true: the package step / bin/dot installs it on Linux"
+deviations_from_plan: >
+  "Polish beyond the original plan, from the VM run. Chose auto-chsh (sudo) over
+  document-only for the 'ready to work' goal; guarded + reversible. Lands on PR 1
+  (#10), bootstrap's home PR — standalone branch, no rebase cascade."
+trade_offs: >
+  "Auto-chsh changes the user's login shell (significant but exactly the ready-to-work
+  intent; reversible via chsh). Used sudo chsh so it works non-interactively; the cost
+  is it acts without a per-user confirmation, mitigated by the not-already-zsh guard."
+self_review:
+  consistency: "Uses the existing success() helper and sudo pattern; guard is a standard `[ -t 0 ]`."
+  error_paths: "chsh wrapped in if/else (non-fatal); /etc/shells append has || true; guard prevents redundant runs."
+  security: "sudo chsh + appending zsh to /etc/shells are standard; no new secret handling."
+  api: "bootstrap behavior change: now sets login shell. No interface/caller change."
+confidence: high
+reviewer_attention:
+  - "script/bootstrap: the sudo chsh block — confirm you want auto-change-login-shell (vs documenting it)"
