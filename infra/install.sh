@@ -50,8 +50,13 @@ elif [[ "$OS" == "Linux" ]]; then
   sudo install -m 0755 "${tmp_tf}/tflint" /usr/local/bin/tflint
   rm -rf "$tmp_tf"
 
-  # tfsec, trivy: official install scripts (install to /usr/local/bin).
-  curl -fsSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+  # tfsec: best-effort. It's archived (folded into Trivy) and its release assets are
+  # unreliable (e.g. no arm64), so a failure here must NOT abort the rest of infra —
+  # trivy below is the supported successor.
+  curl -fsSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash \
+    || echo "infra/install.sh: tfsec install failed (deprecated — Trivy covers it); skipping" >&2
+
+  # trivy: official install script (install to /usr/local/bin).
   curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
     | sudo sh -s -- -b /usr/local/bin
 

@@ -12,13 +12,18 @@ DISTRO=$(uname)
 
 # Run a step with a heading. Topic installers carry their own shebang (zsh), so
 # invoke them with the right interpreter rather than `sh` (which mis-runs zsh
-# array logic). Failures are reported but do not abort the rest.
+# array logic). A failed step is recorded and reported at the end, but does not
+# abort the rest — so one broken installer doesn't block the others.
+failed_steps=""
 run() {
   label=$1
   shift
   echo
   echo "==> ${label}"
-  "$@" 2>&1 || echo "!! ${label} step failed (continuing)"
+  if ! "$@" 2>&1; then
+    echo "!! ${label} step failed (continuing)"
+    failed_steps="${failed_steps} ${label}"
+  fi
 }
 
 # OS-native package layer (Homebrew on macOS; apt/vendor/binary on Ubuntu).
@@ -47,3 +52,14 @@ fi
 
 # Vim bundles (both OSes).
 run "Vim" sh "$DOTHOME/vim/install.sh"
+
+echo
+if [ -n "$failed_steps" ]; then
+  echo "!! Some steps failed:${failed_steps}"
+  echo "   Re-run 'dot', check the output above, or run 'script/doctor' to see what's missing."
+else
+  echo "All steps completed."
+fi
+# Final status (sourcing-safe — no 'exit', so bootstrap's 'if source bin/dot' still works):
+# 0 when every step succeeded, 1 when any step failed.
+[ -z "$failed_steps" ]
