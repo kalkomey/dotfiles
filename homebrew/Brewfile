@@ -63,3 +63,6 @@ brew "yarn"
 
 # git
 brew "git-lfs"
+
+# Platform Tools
+brew "direnv"
