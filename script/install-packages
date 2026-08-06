@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#
+# install-packages
+#
+# OS dispatcher for package installation. Picks the OS-native package installer
+# per docs/package-matrix.md: Homebrew on macOS, apt + vendor repos + official
+# binaries on Ubuntu. This is the command-style entrypoint; the per-OS installers
+# live in script/packages/ and carry a .sh extension.
+
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
+
+case "$(uname)" in
+  Darwin)
+    exec "$HERE/script/packages/darwin.sh"
+    ;;
+  Linux)
+    if command -v apt-get >/dev/null 2>&1; then
+      exec "$HERE/script/packages/ubuntu.sh"
+    else
+      echo "install-packages: only Ubuntu (apt) is supported on Linux." >&2
+      echo "See docs/package-matrix.md for the supported platforms." >&2
+      exit 1
+    fi
+    ;;
+  *)
+    echo "install-packages: unsupported OS '$(uname)'." >&2
+    exit 1
+    ;;
+esac
