@@ -1,0 +1,31 @@
+#compdef mux
+
+# Completion for mux (tmux/aliases.zsh). Position 1 is either a legacy
+# muxable_paths repo or an aios project id (a dir under $AIOS_WORKTREES
+# with a .project.yml). Position 2 only completes when position 1 matched
+# an aios project id, and lists its leaves — the repo checkout and any
+# subtask worktrees already created under it.
+_mux() {
+  local aios_worktrees="${AIOS_WORKTREES:-${HOME}/aios/worktrees}"
+  local -a project_ids legacy_names leaves
+  local d
+
+  if (( CURRENT == 2 )); then
+    for d in ${aios_worktrees}/*(/N); do
+      [[ -f "$d/.project.yml" ]] && project_ids+=("${d:t}")
+    done
+    for d in ${muxable_paths}/*(/N); do
+      legacy_names+=("${d:t}")
+    done
+    _describe -t projects 'aios project' project_ids
+    _describe -t legacy 'repo' legacy_names
+  elif (( CURRENT == 3 )); then
+    local proot="${aios_worktrees}/${words[2]}"
+    [[ -f "${proot}/.project.yml" ]] || return 0
+    for d in ${proot}/*(/N); do
+      [[ "${d:t}" == .* ]] && continue
+      leaves+=("${d:t}")
+    done
+    _describe -t leaves 'worktree' leaves
+  fi
+}

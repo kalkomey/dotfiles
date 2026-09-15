@@ -4,6 +4,9 @@ export DOTHOME=$HOME/.dotfiles
 # source folder that we can `scd [tab]` into
 export SOURCE_DIR=$HOME/src
 
+# aios worktrees root, used by mux() and its completion
+export AIOS_WORKTREES=$HOME/aios/worktrees
+
 # all of our zsh files
 typeset -U config_files
 config_files=($DOTHOME/**/*.zsh)
