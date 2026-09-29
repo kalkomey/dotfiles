@@ -27,6 +27,22 @@ fail () {
   exit
 }
 
+# Best-effort clipboard copy mirroring system/clipboard.zsh, for this bash
+# bootstrap (the zsh abstraction isn't loaded yet). Never fatal: callers also
+# print the value, so a missing backend just means the user copies it manually.
+clipboard_copy () {
+  if command -v pbcopy >/dev/null 2>&1; then
+    pbcopy
+  elif [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+    wl-copy
+  elif [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard
+  else
+    cat >/dev/null
+    return 1
+  fi
+}
+
 setup_gitconfig_local () {
   if ! [ -f $HOME/.gitconfig.local ]
   then
@@ -44,15 +60,23 @@ setup_gitconfig_local () {
 
   mkdir -p ${HOME}/tmp
 
-  if compgen -G "${HOME}/.ssh/id_*.pub" > /dev/null; then
-    echo "ssh keys already generated!"
-    echo
-    echo "skipping…"
+  ssh_key="${HOME}/.ssh/id_ed25519"
+  if [ -f "${ssh_key}.pub" ]; then
+    echo "ssh key already present at ${ssh_key}.pub — skipping generation"
   else
-    ssh-keygen -t rsa -C "${git_authoremail}"
-    cat $HOME/.ssh/id_*.pub
-    cat $HOME/.ssh/id_*.pub | pbcopy
-    echo "Your ssh public key has been copied to your clipboard.\n Add it to github.com (unless it's there already) and press any key to continue"
+    ssh-keygen -t ed25519 -C "${git_authoremail}" -f "${ssh_key}"
+  fi
+
+  if [ -f "${ssh_key}.pub" ]; then
+    cat "${ssh_key}.pub"
+    if clipboard_copy < "${ssh_key}.pub"; then
+      echo
+      echo "Your ssh public key has been copied to your clipboard."
+    else
+      echo
+      echo "(No clipboard backend found — copy the key printed above manually.)"
+    fi
+    echo "Add it to github.com (unless it's there already) and press any key to continue"
     read
   fi
 
@@ -65,7 +89,7 @@ ServerAliveCountMax 3
 ForwardAgent yes
 
 Host *
-  IdentityFile ~/.ssh/id_rsa
+  IdentityFile ~/.ssh/id_ed25519
   AddKeysToAgent yes
 SSHCONFIG
   fi
@@ -160,9 +184,10 @@ install_dotfiles () {
 }
 
 
-fd=0 # stdin
-# Set up gitconfig.local only in an interactive shell
-if [[ -t "$fd" || -p /dev/stdin ]]; then
+# Set up gitconfig.local only when we're actually interactive (a real terminal on
+# stdin). The old `-p /dev/stdin` check also fired under pipes, which ran the
+# interactive prompts during automated/non-interactive provisioning and aborted.
+if [ -t 0 ]; then
   setup_gitconfig_local
 fi
 
@@ -175,6 +200,26 @@ then
 else
   fail "error installing dependencies"
 fi
+
+# Make zsh the login shell — it's the dotfiles' shell. zsh is installed by the
+# package step (on Linux); macOS already defaults to zsh, so this no-ops there.
+# Uses `sudo chsh` so it works without prompting in automated runs too. Non-fatal.
+zsh_path="$(command -v zsh || true)"
+case "${SHELL:-}" in
+  */zsh) ;;
+  *)
+    if [ -n "$zsh_path" ]; then
+      if ! grep -qx "$zsh_path" /etc/shells 2>/dev/null; then
+        echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null || true
+      fi
+      if sudo chsh -s "$zsh_path" "$USER"; then
+        success "login shell set to zsh (open a new terminal to use it)"
+      else
+        echo "  (could not change login shell automatically — run: chsh -s $zsh_path)"
+      fi
+    fi
+    ;;
+esac
 
 echo
 echo '  All installed!'

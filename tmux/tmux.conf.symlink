@@ -29,11 +29,27 @@ set -g history-limit 100000
 # Use up and down arrows for temporary "maximize"
 unbind Up; bind Up resize-pane -Z; unbind Down; bind Down resize-pane -Z
 
-# Copy/paste interop
-bind C-c run "tmux show-buffer | reattach-to-user-namespace pbcopy"
-bind C-v run "reattach-to-user-namespace pbpaste | tmux load-buffer - && tmux paste-buffer"
+# Copy/paste interop — pick a clipboard backend per platform.
+# tmux runs these via /bin/sh, so it can't see the zsh clipboard shim; detect
+# the backend here. macOS: reattach-to-user-namespace + pbcopy/pbpaste.
+# Wayland: wl-clipboard. X11: xclip. If none match, tmux's own buffer still works.
+if-shell 'uname | grep -q Darwin' {
+  bind C-c run "tmux show-buffer | reattach-to-user-namespace pbcopy"
+  bind C-v run "reattach-to-user-namespace pbpaste | tmux load-buffer - && tmux paste-buffer"
+  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'reattach-to-user-namespace pbcopy'
+}
+if-shell '[ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1' {
+  bind C-c run "tmux show-buffer | wl-copy"
+  bind C-v run "wl-paste --no-newline | tmux load-buffer - && tmux paste-buffer"
+  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'wl-copy'
+}
+if-shell '[ -z "$WAYLAND_DISPLAY" ] && [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1' {
+  bind C-c run "tmux show-buffer | xclip -selection clipboard"
+  bind C-v run "xclip -selection clipboard -o | tmux load-buffer - && tmux paste-buffer"
+  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'xclip -selection clipboard'
+}
 
-bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'reattach-to-user-namespace pbcopy'
+# Selection bindings are platform-independent.
 bind -T copy-mode-vi v send-keys -X begin-selection
 bind -T copy-mode-vi V send-keys -X rectangle-toggle
 
