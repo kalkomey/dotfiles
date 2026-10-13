@@ -44,17 +44,6 @@ cdpath=(. ~ ~/src $SOURCE_DIR)
 # go, rust, et al
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# chruby!
-# osx location - option 1
-[[ ! -a /usr/local/opt/chruby/share/chruby/chruby.sh ]] || source /usr/local/opt/chruby/share/chruby/chruby.sh
-[[ ! -a /usr/local/opt/chruby/share/chruby/auto.sh ]] || source /usr/local/opt/chruby/share/chruby/auto.sh
-# macos location - option 2
-[[ ! -a /opt/homebrew/opt/chruby/share/chruby/chruby.sh ]] || source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-[[ ! -a /opt/homebrew/opt/chruby/share/chruby/auto.sh ]] || source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-# ubuntu location
-[[ ! -a /usr/local/share/chruby/chruby.sh ]] || source /usr/local/share/chruby/chruby.sh
-[[ ! -a /usr/local/share/chruby/auto.sh ]] || source /usr/local/share/chruby/auto.sh
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export NVM_DIR="$HOME/.nvm"
@@ -79,7 +68,14 @@ fi
 
 export DOCKER_PLATFORM="linux/$(uname -m)"
 
+eval "$(mise activate zsh)"
+
 # import local zsh customizations, if present
 zrcl="$HOME/.zshrc.local"
 
 [[ ! -a $zrcl ]] || source $zrcl
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/rsamour/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
