@@ -182,6 +182,23 @@ merge() {
     git push origin --delete ${branch}
   fi
   git branch -D ${branch}
+
+  # In a linked worktree, the worktree is done once its branch is merged.
+  # Remove it and step up out of it, so it doesn't keep holding
+  # ${default_branch_name} checked out and block the next merge elsewhere.
+  local git_dir common_dir worktree_root
+  git_dir=$(builtin cd "$(git rev-parse --absolute-git-dir)" && pwd -P)
+  common_dir=$(builtin cd "$(git rev-parse --git-common-dir)" && pwd -P)
+  if [ "${git_dir}" != "${common_dir}" ]; then
+    worktree_root=$(git rev-parse --show-toplevel)
+    builtin cd "${worktree_root:h}" || return
+    if git -C "${common_dir}" worktree remove "${worktree_root}"; then
+      echo "Removed worktree ${worktree_root}"
+    else
+      builtin cd "${worktree_root}"
+      echo "Left worktree ${worktree_root} in place; remove it by hand"
+    fi
+  fi
 }
 
 NCPU=$([[ $(uname) = 'Darwin' ]] && sysctl -n hw.ncpu || nproc --all)
