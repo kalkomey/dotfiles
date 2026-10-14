@@ -194,3 +194,9 @@ augroup organization
   autocmd User Rails nnoremap <buffer> <D-R> :<C-U>.Rake<CR>
   autocmd User Fugitive command! -bang -bar -buffer -nargs=* Gpr :Git<bang> pull --rebase --prune <args>
 augroup END
+
+" Search with ripgrep via ack.vim (:Ack). :Ag kept as an alias for muscle memory.
+if executable('rg')
+  let g:ackprg = 'rg --vimgrep --smart-case'
+  cnoreabbrev Ag Ack
+endif
