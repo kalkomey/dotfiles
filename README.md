@@ -23,10 +23,42 @@ defaults, and so on. Tweak this script, and occasionally run `dot` from
 time to time to keep your environment fresh and up-to-date. You can find
 this script in `bin/`.
 
+### languages, tools, and zsh plugins
+
+Languages and CLI tools are managed by [mise](https://mise.jdx.dev). `dot`
+first runs `script/ask`, which asks everything up front (and offers sensible
+defaults), then runs one installer per topic (`mise/`, `fonts/`, `neovim/`,
+`zsh/`) from your answers. The questions cover:
+
+- **languages** — Ruby 4.0.6 (our baseline) and Node LTS are on by default;
+  Python, Go, Rust, Java and Elixir are available, and you can type any other
+  mise tool as `name@version` (or `name@latest`). Entries are checked against
+  mise before anything installs.
+- **CLI tools** — aws-cli, gh, jq, ripgrep, terraform, vault, etc.
+- **oh-my-zsh plugins** — `git` and friends.
+- **Nerd Fonts** — FiraCode and DejaVu Sans Mono are listed and on by default;
+  type `m` to scroll through every other Nerd Font Homebrew offers (read from
+  Homebrew). Preview them at https://www.nerdfonts.com/font-downloads. JetBrains
+  Mono, Cascadia (Caskaydia Cove), Monaspace and others have ligatures. Set your
+  terminal font to the family name, e.g. "FiraCode Nerd Font", and turn on
+  ligatures if your terminal has a setting (iTerm2 does; Terminal.app has no
+  ligature support).
+- **Neovim + LazyVim** — optional (off by default). Installs Neovim, `fd`,
+  `lazygit`, and the LazyVim starter into `~/.config/nvim` (skipped if that
+  directory already exists). LazyVim wants a Nerd Font, so pick one above. Run
+  with `nvim`; your vim setup is untouched.
+
+Answers are saved in `~/.config/dotfiles/install-choices` and reused on later
+runs. To be asked again, run `RECONFIGURE=1 bin/dot`. Anything can also be
+set non-interactively, e.g. `MISE_LANGUAGES="ruby@4.0.6 node@lts" bin/dot`.
+To preview without installing anything, run `script/ask --dry-run`: it asks
+the questions, prints your choices, and stops (nothing is installed or saved).
+Projects pick their own versions with `.tool-versions`, `mise.toml`,
+`.ruby-version` or `.node-version`.
+
 ## custom install
 
-If you are using an alternative shell like fish, or alternative version manager software like asdf, some of the commands might not be a good fit for you. You might also want to ignore certain aliases or osx configuration changes to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`. You might also need some of the workarounds like the ones for mysql described in `ruby/install.sh`.
-
+If you are using an alternative shell like fish, or alternative version manager software, some of the commands might not be a good fit for you. You might also want to ignore certain aliases or osx configuration changes to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`.
 ## topical
 
 Everything's built around topic areas. If you're adding a new area to your
