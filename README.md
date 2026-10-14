@@ -56,6 +56,14 @@ the questions, prints your choices, and stops (nothing is installed or saved).
 Projects pick their own versions with `.tool-versions`, `mise.toml`,
 `.ruby-version` or `.node-version`.
 
+### docker
+
+`docker/install.sh` installs the open-source Docker CLI, Colima (the VM that
+runs containers), `docker compose` and `docker buildx` as CLI plugins, and
+lazydocker. **We do not use Docker Desktop**: at our size its license requires a
+paid subscription. After installing, run `colima start` once (and
+`brew services start colima` to start it at login).
+
 ## custom install
 
 If you are using an alternative shell like fish, or alternative version manager software, some of the commands might not be a good fit for you. You might also want to ignore certain aliases or osx configuration changes to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`.

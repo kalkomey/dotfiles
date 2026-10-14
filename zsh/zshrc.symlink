@@ -67,8 +67,3 @@ for f in $DOTHOME/**/aliases.zsh(N); do source $f; done
 zrcl="$HOME/.zshrc.local"
 
 [[ ! -a $zrcl ]] || source $zrcl
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/rsamour/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
-# End of Docker CLI completions

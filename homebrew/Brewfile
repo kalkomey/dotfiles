@@ -1,6 +1,7 @@
 # Language runtimes and CLI tools (node, ruby, terraform, vault, nomad, consul,
 # aws-cli, aws-vault, gh, jq, fzf, ripgrep, direnv, git-lfs, gron, yarn) are
 # managed by mise. See mise/install.sh. Only things mise can't/shouldn't manage live here.
+# Docker (CLI, Colima, compose, lazydocker) is installed by docker/install.sh, not Docker Desktop.
 
 # Core
 brew "git"
