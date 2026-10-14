@@ -72,7 +72,7 @@ mux() {
 
   if ! tmux has-session -t "=$name" &>/dev/null; then
     local cols="$(tput cols)"
-    tmux new-session -d -n code -s ${name} -x${cols-150} -y50 'reattach-to-user-namespace -l zsh'
+    tmux new-session -d -n code -s ${name} -x${cols-150} -y50 'zsh'
     echo "Creating tmux session for ${name}"
     name="${name}" source "${mux_file}"
   fi
