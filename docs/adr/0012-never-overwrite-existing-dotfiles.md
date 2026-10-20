@@ -35,8 +35,8 @@ Nothing is deleted, and nothing existing is replaced without an answer.
   up front.
 - `script/bootstrap --dry-run` lists each destination as new, already linked, or a conflict, without asking or changing
   anything.
-- The other writers follow the same rule: `zsh/install.sh` will not append to a `~/.zshenv` that is a symlink (it prints
-  the line to add), and `mise/install.sh` copies an existing mise `config.toml`/`settings.toml` into the backup directory
+- The other writers follow the same rule: `zsh/install.sh` will not append to a `~/.zshenv` or `~/.zprofile` that is a symlink (it prints
+  what to add), and `mise/install.sh` copies an existing mise `config.toml`/`settings.toml` into the backup directory
   before `mise use --global` edits it.
 
 ## Alternatives considered

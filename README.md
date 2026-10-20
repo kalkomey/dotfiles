@@ -63,6 +63,10 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `neovim/`,
   directory already exists). LazyVim wants a Nerd Font, so pick one above. Run
   with `nvim`; your vim setup is untouched.
 
+The zsh installer also appends one marked block to `~/.zprofile` (Homebrew's
+`shellenv`, then mise shims) so login shells, scripts and IDE tasks use the same
+mise-managed ruby and node as your interactive terminal. Delete the block to undo it.
+
 Answers are saved in `~/.config/dotfiles/install-choices` and reused on later
 runs. To be asked again, run `RECONFIGURE=1 bin/dot`. Anything can also be
 set non-interactively, e.g. `MISE_LANGUAGES="ruby@4.0.6 node@lts" bin/dot`.

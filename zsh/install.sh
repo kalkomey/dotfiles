@@ -49,6 +49,34 @@ if [[ "${ZOXIDE_CD:-0}" == 1 && " $ZSH_PLUGINS " == *" zoxide "* ]]; then
   fi
 fi
 
+# mise shims for login shells, scripts, git hooks and IDE tasks. ~/.zshrc only runs
+# in interactive shells, where `mise activate` does the job; ~/.zprofile is read by
+# every login shell, after macOS's /etc/zprofile has reordered PATH (so not
+# ~/.zshenv, which runs before it). Homebrew goes first in the block so shims, added
+# after it, win over Homebrew's ruby/node. One delimited block, appended once; the
+# versions resolve the same way as in an interactive shell because both follow mise's config.
+ZPROFILE_BEGIN='# >>> dotfiles: Homebrew, then mise shims (managed by zsh/install.sh) >>>'
+ZPROFILE_BLOCK="$ZPROFILE_BEGIN
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval \"\$(/opt/homebrew/bin/brew shellenv)\"
+elif [ -x /usr/local/bin/brew ]; then
+  eval \"\$(/usr/local/bin/brew shellenv)\"
+fi
+if command -v mise >/dev/null 2>&1; then
+  eval \"\$(mise activate zsh --shims)\"
+fi
+# <<< dotfiles <<<"
+if [[ -L "$HOME/.zprofile" ]]; then
+  warn "~/.zprofile is a symlink to $(readlink "$HOME/.zprofile"); not editing it. To get mise in login shells and scripts, add this to it yourself:"
+  printf '%s\n' "$ZPROFILE_BLOCK" >&2
+elif grep -qsF -- "$ZPROFILE_BEGIN" "$HOME/.zprofile"; then
+  say "~/.zprofile already has the mise shims block; leaving it."
+else
+  say "Adding Homebrew + mise shims to ~/.zprofile (login shells and scripts)"
+  [[ ! -s "$HOME/.zprofile" || -z "$(tail -c1 "$HOME/.zprofile")" ]] || echo >> "$HOME/.zprofile"
+  printf '%s\n' "$ZPROFILE_BLOCK" >> "$HOME/.zprofile"
+fi
+
 mkdir -p "$CONFIG_DIR"
 say "Writing $CONFIG_DIR/zsh-plugins.zsh"
 {

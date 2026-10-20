@@ -24,6 +24,12 @@ Two constraints shape how:
 - mise is activated **before** oh-my-zsh, so tools it provides (fzf, direnv) exist when their plugins load.
 - Homebrew's `shellenv` is evaluated just before mise, so mise's tool directories end up ahead of Homebrew's on `PATH`
   and mise's ruby and node win over any that Homebrew installed as a dependency.
+- `~/.zshrc` only runs in interactive shells, so `zsh/install.sh` also appends a delimited block to `~/.zprofile`
+  (created if missing, written once, never through a symlink) that evaluates `brew shellenv` and then
+  `mise activate zsh --shims`. Login shells, scripts, git hooks and IDE tasks get mise's runtimes through the shims;
+  interactive shells get them through `mise activate`. Both follow the same mise config, so the versions match.
+  It goes in `~/.zprofile`, not `~/.zshenv`, because `/etc/zprofile` (macOS `path_helper`) reorders `PATH` after
+  `.zshenv` runs and would put system tools ahead of the shims.
 - After oh-my-zsh loads, `zshrc.symlink` re-sources every `aliases.zsh` so our aliases override the plugins'.
 - The default plugins are `git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv zoxide tmux macos`
   plus the two external ones, with `zsh-syntax-highlighting` last. Engineers choose their own in the picker
