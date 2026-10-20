@@ -4,7 +4,23 @@ Kalkomey's dotfiles based on [Zach Holman](https://github.com/holman)'s [dotfile
 
 ## install
 
-Run this:
+Run this in Terminal:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/kalkomey/dotfiles/master/setup.sh | bash
+```
+
+It installs the Xcode Command Line Tools if needed, clones this repo into
+`~/.dotfiles` (or fast-forwards an existing clean checkout), and runs
+`script/bootstrap`. To preview without changing anything, add `-s -- --dry-run`
+after `bash`. If you would rather read the script first:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/kalkomey/dotfiles/master/setup.sh -o setup.sh
+less setup.sh && bash setup.sh
+```
+
+Or do it by hand:
 
 ```sh
 git clone https://github.com/kalkomey/dotfiles.git ~/.dotfiles
@@ -12,7 +28,7 @@ cd ~/.dotfiles
 script/bootstrap
 ```
 
-This will symlink the appropriate files in `.dotfiles` to your home directory.
+Bootstrap will symlink the appropriate files in `.dotfiles` to your home directory.
 Everything is configured and tweaked within `~/.dotfiles`.
 
 ### already have dotfiles (or use stow)?
