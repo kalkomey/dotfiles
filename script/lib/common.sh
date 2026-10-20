@@ -181,8 +181,8 @@ pick_items() {
     done
     echo
     if [[ "$versions" == 1 ]]; then
-      echo "  Toggle: numbers (e.g. 3 4)   Set version: N=version (e.g. 3=3.13, 2=latest)"
-      echo "  Add any mise tool: name@version (e.g. php@8.4, zig@latest)"
+      echo "  Type numbers to select or deselect (e.g. 3 4)."
+      echo "  Type name@version for a specific version (e.g. ruby@4.0.7), or to add a tool not in the list (e.g. php@8.4, zig@latest)."
     else
       if [[ "$validate" == 2 ]]; then echo "  Toggle: numbers (e.g. 4 5)   Add another Nerd Font by short name (e.g. hack)"
       else echo "  Toggle: numbers (e.g. 4 5)   Add any mise tool: name (e.g. bat, yq)"; fi
