@@ -241,6 +241,7 @@ link_summary() {
       say "You kept your ~/.zshrc, so mise and the oh-my-zsh plugins you chose are not loaded. To use them, add to it:"
       cat <<'EOF'
 
+    # after any `brew shellenv` line, so mise's ruby/node win over Homebrew's
     eval "$(mise activate zsh)"
     export ZSH="$HOME/.oh-my-zsh"
     plugins=(git)

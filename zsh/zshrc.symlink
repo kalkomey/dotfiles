@@ -48,6 +48,18 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 export DOCKER_PLATFORM="linux/$(uname -m)"
 
+# Homebrew, then mise, in that order. `brew shellenv` puts Homebrew's bin dirs at
+# the front of PATH, and `mise activate` then puts mise's tool dirs in front of
+# those, so the ruby/node/etc. you get are mise's, not copies Homebrew installed as
+# dependencies of other formulae. Don't move mise above this, and don't run
+# `brew shellenv` after it. (Login shells already ran it from ~/.zprofile; this
+# covers tmux panes and editor terminals, and is harmless to repeat.)
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
 # mise manages ruby, node, and CLI tools (see mise/install.sh). Activate it
 # before oh-my-zsh so tools it provides (fzf, direnv, zoxide) exist when plugins load.
 eval "$(mise activate zsh)"

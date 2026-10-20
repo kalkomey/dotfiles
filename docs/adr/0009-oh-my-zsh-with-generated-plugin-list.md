@@ -22,6 +22,8 @@ Two constraints shape how:
 - The chosen plugin list is written to `~/.config/dotfiles/zsh-plugins.zsh`, outside the repo. `zshrc.symlink` loads
   it (defaulting to `plugins=(git)`) and then sources oh-my-zsh.
 - mise is activated **before** oh-my-zsh, so tools it provides (fzf, direnv) exist when their plugins load.
+- Homebrew's `shellenv` is evaluated just before mise, so mise's tool directories end up ahead of Homebrew's on `PATH`
+  and mise's ruby and node win over any that Homebrew installed as a dependency.
 - After oh-my-zsh loads, `zshrc.symlink` re-sources every `aliases.zsh` so our aliases override the plugins'.
 - The default plugins are `git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv zoxide tmux macos`
   plus the two external ones, with `zsh-syntax-highlighting` last. Engineers choose their own in the picker
