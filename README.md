@@ -35,7 +35,10 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `neovim/`,
   mise tool as `name@version` (or `name@latest`). Entries are checked against
   mise before anything installs.
 - **CLI tools** — aws-cli, gh, jq, ripgrep, terraform, vault, etc.
-- **oh-my-zsh plugins** — `git` and friends.
+- **oh-my-zsh plugins** — `git` and friends. With the `zoxide` plugin on, you
+  are also asked whether to replace `cd` with zoxide; if so,
+  `export ZOXIDE_CMD_OVERRIDE=cd` is appended to `~/.zshenv` (created if
+  missing). `z` and `zi` work either way.
 - **Nerd Fonts** — FiraCode and DejaVu Sans Mono are listed and on by default;
   type `m` to scroll through every other Nerd Font Homebrew offers (read from
   Homebrew). Preview them at https://www.nerdfonts.com/font-downloads. JetBrains

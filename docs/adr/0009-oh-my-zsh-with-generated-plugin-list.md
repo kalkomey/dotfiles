@@ -23,9 +23,13 @@ Two constraints shape how:
   it (defaulting to `plugins=(git)`) and then sources oh-my-zsh.
 - mise is activated **before** oh-my-zsh, so tools it provides (fzf, direnv) exist when their plugins load.
 - After oh-my-zsh loads, `zshrc.symlink` re-sources every `aliases.zsh` so our aliases override the plugins'.
-- The default plugins are `git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv tmux macos`
+- The default plugins are `git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv zoxide tmux macos`
   plus the two external ones, with `zsh-syntax-highlighting` last. Engineers choose their own in the picker
   ([0005](0005-defaults-first-pickers-with-validated-free-form-entries.md)).
+
+- The `zoxide` plugin defines `z` and `zi`. If the engineer opts in, `zsh/install.sh` appends
+  `export ZOXIDE_CMD_OVERRIDE=cd` to `~/.zshenv` (created if missing, not duplicated), which makes the plugin define
+  `cd` and `cdi` instead. `~/.zshenv` is used because zsh reads it before `~/.zshrc`, and it is not a tracked file.
 
 ## Alternatives considered
 

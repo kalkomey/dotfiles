@@ -33,6 +33,22 @@ for repo in zsh-users/zsh-autosuggestions zsh-users/zsh-syntax-highlighting; do
   fi
 done
 
+# Replace `cd` with zoxide. The oh-my-zsh zoxide plugin reads ZOXIDE_CMD_OVERRIDE,
+# and ~/.zshenv is read before ~/.zshrc. Append (or create) it, once.
+if [[ "${ZOXIDE_CD:-0}" == 1 && " $ZSH_PLUGINS " == *" zoxide "* ]]; then
+  if [[ -L "$HOME/.zshenv" ]]; then
+    # Appending would write through the link into someone's dotfiles repo (stow).
+    warn "~/.zshenv is a symlink to $(readlink "$HOME/.zshenv"); not editing it. Add this line to it yourself: export ZOXIDE_CMD_OVERRIDE=cd"
+  elif grep -qs '^export ZOXIDE_CMD_OVERRIDE=' "$HOME/.zshenv"; then
+    say "~/.zshenv already sets ZOXIDE_CMD_OVERRIDE; leaving it."
+  else
+    say "Adding ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv"
+    # Keep a prior file's last line intact if it lacks a trailing newline.
+    [[ ! -s "$HOME/.zshenv" || -z "$(tail -c1 "$HOME/.zshenv")" ]] || echo >> "$HOME/.zshenv"
+    echo 'export ZOXIDE_CMD_OVERRIDE=cd' >> "$HOME/.zshenv"
+  fi
+fi
+
 mkdir -p "$CONFIG_DIR"
 say "Writing $CONFIG_DIR/zsh-plugins.zsh"
 {

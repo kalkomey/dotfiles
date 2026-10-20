@@ -49,7 +49,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export DOCKER_PLATFORM="linux/$(uname -m)"
 
 # mise manages ruby, node, and CLI tools (see mise/install.sh). Activate it
-# before oh-my-zsh so tools it provides (fzf, direnv) exist when plugins load.
+# before oh-my-zsh so tools it provides (fzf, direnv, zoxide) exist when plugins load.
 eval "$(mise activate zsh)"
 
 # oh-my-zsh. zsh/install.sh installs it and writes the chosen plugin list.

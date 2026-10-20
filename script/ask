@@ -25,6 +25,7 @@
 #   FONTS="fira-code dejavu-sans-mono"     Nerd Fonts ("none" for no fonts)
 #   NEOVIM=1|0                             Neovim + LazyVim (default: ask, then no)
 #   ZSH_PLUGINS="git gh ..."               oh-my-zsh plugins (syntax-highlighting last)
+#   ZOXIDE_CD=1|0                          replace cd with zoxide via ~/.zshenv (default: ask, then no)
 #   SKIP_ZSH=1                             skip the oh-my-zsh question and install
 #   SKIP_BREW_DEPS=1                       (mise/install.sh) skip build-library install
 #   RECONFIGURE=1                          ignore saved answers and ask again
@@ -58,6 +59,7 @@ print_plan() {
     printf '  %-15s %s\n' "ZSH_PLUGINS" "(skipped: SKIP_ZSH)"
   else
     printf '  %-15s %s\n' "ZSH_PLUGINS" "${ZSH_PLUGINS:-}"
+    printf '  %-15s %s\n' "ZOXIDE_CD" "$ZOXIDE_CD$([[ "$ZOXIDE_CD" == 1 ]] && echo '  (adds ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv)')"
   fi
   if (( ${#DERIVED[@]} )); then
     echo

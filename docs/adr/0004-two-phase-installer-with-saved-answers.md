@@ -25,7 +25,7 @@ newer bash.
 Homebrew, mise), then asks every question and saves the answers to `~/.config/dotfiles/install-choices`.
 `bin/dot` runs it first thing; the slow installers that follow read the saved answers and run unattended.
 Saved answers are reused silently on later runs; `RECONFIGURE=1` asks again; environment variables
-(`MISE_LANGUAGES`, `MISE_TOOLS`, `FONTS`, `NEOVIM`, `ZSH_PLUGINS`) override both and skip the matching question.
+(`MISE_LANGUAGES`, `MISE_TOOLS`, `FONTS`, `NEOVIM`, `ZSH_PLUGINS`, `ZOXIDE_CD`) override both and skip the matching question.
 
 **One topic per directory.** Each of `mise/`, `fonts/`, `neovim/` and `zsh/` owns its questions
 (`ask.sh`, sourced by `script/ask`) and its installer (`install.sh`). Each `install.sh` runs on its own: it
