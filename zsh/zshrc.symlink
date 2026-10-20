@@ -52,8 +52,9 @@ export DOCKER_PLATFORM="linux/$(uname -m)"
 # the front of PATH, and `mise activate` then puts mise's tool dirs in front of
 # those, so the ruby/node/etc. you get are mise's, not copies Homebrew installed as
 # dependencies of other formulae. Don't move mise above this, and don't run
-# `brew shellenv` after it. (Login shells already ran it from ~/.zprofile; this
-# covers tmux panes and editor terminals, and is harmless to repeat.)
+# `brew shellenv` after it. (Homebrew's installer usually adds this line to
+# ~/.zprofile already; repeating it here is harmless and means this file does not
+# depend on that.)
 if [ -x /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [ -x /usr/local/bin/brew ]; then
