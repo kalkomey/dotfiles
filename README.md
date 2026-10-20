@@ -15,6 +15,18 @@ script/bootstrap
 This will symlink the appropriate files in `.dotfiles` to your home directory.
 Everything is configured and tweaked within `~/.dotfiles`.
 
+### already have dotfiles (or use stow)?
+
+Nothing you have is overwritten without asking. For each file that already
+exists (including symlinks into your own dotfiles repo) you are asked to
+**keep** yours, use the **new** one, **merge** (a two-pane `vimdiff`, or set
+`MERGE_TOOL`), or **diff** them. Choosing new or merge moves your original into
+`~/.dotfiles-backup/<timestamp>/` first; nothing is deleted, and your stow
+directory is never written to. Preview with `script/bootstrap --dry-run`. With
+no terminal to ask on, your files are kept (`DOTFILES_LINK=new` to override).
+If you keep your `~/.zshrc`, the installer prints the lines to add so mise and
+the oh-my-zsh plugins load.
+
 The main file you'll want to change right off the bat is `zsh/zshrc.symlink`,
 which sets up a few paths that'll be different on your particular machine.
 

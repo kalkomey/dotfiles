@@ -15,6 +15,21 @@ if [[ -z "${SKIP_BREW_DEPS:-}" ]]; then
   brew install "${BUILD_DEPS[@]}"
 fi
 
+# People who already use mise have a global config. `mise use --global` edits it in
+# place (it changes the entry for each tool we install and leaves the rest), so keep
+# a copy first. If it is a symlink (stow), mise writes through into that repo.
+MISE_CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+for f in config.toml settings.toml; do
+  [[ -e "$MISE_CONF_DIR/$f" ]] || continue
+  bk="$HOME/.dotfiles-backup/mise-$f.$(date +%Y%m%d-%H%M%S)"
+  mkdir -p "$(dirname "$bk")"
+  cp -p "$MISE_CONF_DIR/$f" "$bk"
+  say "Existing mise $f backed up to $bk; entries for the tools you chose are updated in place."
+  if [[ -L "$MISE_CONF_DIR/$f" ]]; then
+    warn "$MISE_CONF_DIR/$f is a symlink to $(readlink "$MISE_CONF_DIR/$f"); mise will edit that file."
+  fi
+done
+
 # Honor legacy .ruby-version / .node-version files so existing
 # repos work without a .tool-versions migration.
 say "Configuring mise..."

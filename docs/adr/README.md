@@ -20,6 +20,7 @@ one file per decision, numbered in the order they were made.
 | [0009](0009-oh-my-zsh-with-generated-plugin-list.md) | oh-my-zsh with a generated plugin list; our aliases win | Accepted |
 | [0010](0010-optional-neovim-lazyvim.md) | Optional Neovim + LazyVim alongside the existing vim setup | Accepted |
 | [0011](0011-nerd-fonts-chosen-from-homebrew.md) | Nerd Fonts chosen from what Homebrew offers | Accepted |
+| [0012](0012-never-overwrite-existing-dotfiles.md) | Never overwrite existing dotfiles: ask, back up, never delete | Accepted |
 
 ## Adding one
 
