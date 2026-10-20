@@ -25,6 +25,8 @@ LINK_LOG=()
 LINK_KEPT=()
 LINK_STOW_REPLACED=0
 LINK_ANS=""
+LINK_ZSHRC_BK=""
+LINK_GITCONFIG_BK=""
 
 # /Users/me/.zshrc -> ~/.zshrc, for display.
 tilde() {
@@ -185,6 +187,8 @@ link_dotfile() {
     printf '\n  %s already exists: %s.\n' "$shown" "$desc"
     echo "  [k]eep yours   [n]ew: use this repo's (yours is backed up)   [m]erge   [d]iff"
     echo "  (K or N: give the same answer to every remaining conflict)"
+    [[ "$dst" != "$HOME/.zshrc" ]] || echo "  Tip: personal zsh config (aliases, exports, source lines) goes in ~/.zshrc.local, which the repo's .zshrc loads last."
+    [[ "$dst" != "$HOME/.gitconfig" ]] || echo "  Tip: personal git settings go in ~/.gitconfig.local, which the repo's .gitconfig includes."
     link_ask '  ? '
     case "$LINK_ANS" in
       k) choice=keep ;;
@@ -213,6 +217,8 @@ link_dotfile() {
       bk="$(backup_dst "$dst")"
       ln -s "$src" "$dst"
       LINK_LOG+=("linked   $shown (yours moved to $(tilde "$bk")$note)")
+      if [[ "$dst" == "$HOME/.zshrc" ]]; then LINK_ZSHRC_BK="$bk"; fi
+      if [[ "$dst" == "$HOME/.gitconfig" ]]; then LINK_GITCONFIG_BK="$bk"; fi
       ;;
   esac
   if [[ "$choice" != keep && "$was_rel" == 1 ]]; then LINK_STOW_REPLACED=1; fi
@@ -229,6 +235,14 @@ link_summary() {
   if [[ -d "$BACKUP_DIR" ]]; then
     echo
     say "Originals you replaced or merged are in $(tilde "$BACKUP_DIR"). Move one back to restore it."
+  fi
+  if [[ -n "$LINK_ZSHRC_BK" ]]; then
+    echo
+    say "Your old ~/.zshrc is saved at $(tilde "$LINK_ZSHRC_BK"). Move anything personal (aliases, exports, source lines) into ~/.zshrc.local; the new .zshrc loads it last."
+  fi
+  if [[ -n "$LINK_GITCONFIG_BK" ]]; then
+    echo
+    say "Your old ~/.gitconfig is saved at $(tilde "$LINK_GITCONFIG_BK"). Move personal settings into ~/.gitconfig.local; the new .gitconfig includes it."
   fi
   if [[ "$LINK_STOW_REPLACED" == 1 ]]; then
     echo
