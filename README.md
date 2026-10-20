@@ -27,8 +27,16 @@ no terminal to ask on, your files are kept (`DOTFILES_LINK=new` to override).
 If you keep your `~/.zshrc`, the installer prints the lines to add so mise and
 the oh-my-zsh plugins load.
 
-The main file you'll want to change right off the bat is `zsh/zshrc.symlink`,
-which sets up a few paths that'll be different on your particular machine.
+Personal settings and secrets (API keys, tokens, your own aliases) go in
+`~/.zshrc.local`, which `zshrc.symlink` loads last and which is never committed.
+Start from the template:
+
+```sh
+cp ~/.dotfiles/zsh/zshrc.local.example ~/.zshrc.local
+```
+
+Never put tokens in a tracked file. Git settings work the same way, in
+`~/.gitconfig.local`.
 
 `dot` is a simple script that installs some dependencies, sets sane OS X
 defaults, and so on. Tweak this script, and occasionally run `dot` from
