@@ -48,7 +48,3 @@
         browser = open
 [include]
         path = ~/.gitconfig.local
-[maintenance]
-	repo = /Users/rsamour/aios/repos/slash.git
-	repo = /Users/rsamour/aios/repos/flvs-demo.git
-	repo = /Users/rsamour/aios/repos/kelp.git
