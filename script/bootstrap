@@ -105,10 +105,29 @@ install_dotfiles () {
   link_summary
 }
 
+# Personal zsh settings and secrets live in ~/.zshrc.local (untracked; the repo's
+# .zshrc loads it last). Create it from the template, but never touch an existing
+# one, or one that is a symlink.
+setup_zshrc_local () {
+  local f="$HOME/.zshrc.local"
+  if [ -e "$f" ] || [ -L "$f" ]
+  then
+    return 0
+  fi
+  if dry
+  then
+    echo "  create   ~/.zshrc.local (from zsh/zshrc.local.example)"
+    return 0
+  fi
+  cp "$DOTFILES_ROOT/zsh/zshrc.local.example" "$f"
+  say 'Created ~/.zshrc.local from the template: put API keys, tokens and personal aliases there'
+}
+
 
 if dry
 then
   install_dotfiles
+  setup_zshrc_local
   echo
   say 'Dry run: nothing was linked or installed. See also: script/ask --dry-run'
   exit 0
@@ -121,6 +140,7 @@ if [[ -t "$fd" || -p /dev/stdin ]]; then
 fi
 
 install_dotfiles
+setup_zshrc_local
 
 info "installing dependencies"
 if source bin/dot
