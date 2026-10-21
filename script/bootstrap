@@ -71,9 +71,15 @@ setup_gitconfig_local () {
 setup_ssh_key () {
   local email="${git_authoremail:-}" key candidate
 
+  # Comment for the key: the email just typed, else the one in ~/.gitconfig.local,
+  # else whatever git is configured with (for example an old ~/.gitconfig [user]).
   if [ -z "$email" ] && [ -f "$HOME/.gitconfig.local" ]
   then
     email="$(git config --file "$HOME/.gitconfig.local" user.email 2>/dev/null || true)"
+  fi
+  if [ -z "$email" ]
+  then
+    email="$(git config user.email 2>/dev/null || true)"
   fi
 
   mkdir -p -m 700 "$HOME/.ssh"
