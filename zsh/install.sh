@@ -15,9 +15,12 @@ fi
 export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
 
 if [[ ! -d "$ZSH" ]]; then
-  say "Installing oh-my-zsh..."
-  RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  # Download first, so a failed download is an error and not an empty script that "succeeds".
+  omz_installer="$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+    || die "Could not download the oh-my-zsh installer."
+  # RUNZSH/CHSH stop it starting a shell or changing yours; KEEP_ZSHRC keeps our .zshrc.
+  # Its banner and clone progress go to a log, shown only if it fails.
+  quiet_run "Installing oh-my-zsh..." env RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$omz_installer"
 fi
 
 ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$ZSH/custom}"
