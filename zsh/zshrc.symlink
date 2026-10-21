@@ -1,3 +1,8 @@
+# Keep PATH and fpath free of duplicates (first occurrence wins), including entries
+# added later by mise, Homebrew and our topic files. `path` and `fpath` are the
+# array forms of PATH and FPATH.
+typeset -U path fpath
+
 # shortcut to this dotfiles path is $DOTHOME
 export DOTHOME=$HOME/.dotfiles
 
