@@ -63,32 +63,54 @@ setup_gitconfig_local () {
 
   mkdir -p ${HOME}/tmp
 
+  setup_ssh_key
+}
+
+# Make sure there is an SSH key and a ~/.ssh/config that uses it. Never touches an
+# existing key or an existing config. New keys are ed25519 (GitHub's recommendation).
+setup_ssh_key () {
+  local email="${git_authoremail:-}" key candidate
+
+  if [ -z "$email" ] && [ -f "$HOME/.gitconfig.local" ]
+  then
+    email="$(git config --file "$HOME/.gitconfig.local" user.email 2>/dev/null || true)"
+  fi
+
+  mkdir -p -m 700 "$HOME/.ssh"
+
   if compgen -G "${HOME}/.ssh/id_*.pub" > /dev/null; then
     echo "ssh keys already generated!"
     echo
     echo "skipping…"
   else
-    ssh-keygen -t rsa -C "${git_authoremail}"
-    cat $HOME/.ssh/id_*.pub
-    cat $HOME/.ssh/id_*.pub | pbcopy
-    echo "Your ssh public key has been copied to your clipboard.\n Add it to github.com (unless it's there already) and press any key to continue"
+    ssh-keygen -t ed25519 -C "$email"
+    cat "$HOME/.ssh/id_ed25519.pub"
+    pbcopy < "$HOME/.ssh/id_ed25519.pub"
+    echo "Your ssh public key has been copied to your clipboard."
+    echo "Add it to github.com (unless it's there already), then press Enter to continue."
     read
   fi
 
-
   if [ ! -f "$HOME/.ssh/config" ]; then
-    echo "Writing .ssh/config"
+    # Point at the key that is actually there: the one just made, else the first
+    # existing key of the common types.
+    key=
+    for candidate in id_ed25519 id_ecdsa id_rsa
+    do
+      if [ -f "$HOME/.ssh/$candidate" ]; then key="$candidate"; break; fi
+    done
+    key="${key:-id_ed25519}"
+    echo "Writing .ssh/config (IdentityFile ~/.ssh/$key)"
 cat > $HOME/.ssh/config <<SSHCONFIG
 ServerAliveInterval 60
 ServerAliveCountMax 3
 ForwardAgent yes
 
 Host *
-  IdentityFile ~/.ssh/id_rsa
+  IdentityFile ~/.ssh/$key
   AddKeysToAgent yes
 SSHCONFIG
   fi
-
 }
 
 
