@@ -35,10 +35,18 @@ cd() {
     fi
   fi
 
+  # With zoxide replacing cd (ZOXIDE_CMD_OVERRIDE=cd, see zsh/install.sh), this function
+  # shadows the `cd` zoxide defines, since our aliases are sourced after it. Hand off to
+  # zoxide's own function so `cd` keeps learning and jumping.
+  if [[ "${ZOXIDE_CMD_OVERRIDE:-}" == cd ]] && (( $+functions[__zoxide_z] )); then
+    __zoxide_z "$@"
+    return
+  fi
+
   builtin cd "$@"
 }
 
-# mux <path>                    legacy: cd into a plain repo checkout,
+# mux <path>                   legacy: cd into a plain repo checkout,
 #                                session named for its basename
 # mux <project_id> [<leaf>]     aios: cd into ~/aios/worktrees/<project_id>[/<leaf>],
 #                                session named "<project_id>/<leaf>" so it
