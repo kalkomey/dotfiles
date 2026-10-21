@@ -46,9 +46,26 @@ if grep -qs '"credsStore"[[:space:]]*:[[:space:]]*"desktop"' "$HOME/.docker/conf
   warn 'Delete that line (or change it to "osxkeychain" after: brew install docker-credential-helper).'
 fi
 
+# --- Start Colima now, and at every login ------------------------------------
+# `brew services` registers a launchd agent that runs `colima start -f` when you log
+# in, so Colima is back after a reboot as soon as you sign in. It cannot take flags;
+# the VM uses whatever settings Colima has saved for its profile (~/.colima/default).
+if brew services list 2>/dev/null | awk '$1 == "colima" && $2 == "started" { f = 1 } END { exit !f }'; then
+  say "Colima is already set to start at login."
+elif colima status >/dev/null 2>&1; then
+  # Started by hand. Starting the service now would fight with it, and stopping it
+  # would stop your running containers, so leave that choice to the engineer.
+  say "Colima is already running (started by hand). To also start it at login:"
+  echo "  colima stop && brew services start colima"
+else
+  quiet_run "Starting Colima now and at every login (brew services)..." brew services start colima \
+    || warn "Could not register the Colima service. Start it yourself: colima start"
+fi
+
 echo
-echo "Docker is installed. There is no daemon until you start Colima:"
-echo "  colima start                      # first run creates the VM"
-echo "  brew services start colima        # optional: start it at login"
-echo "Apple Silicon, to run amd64 images faster: colima start --vm-type vz --vz-rosetta"
-echo "Then: docker run hello-world, docker compose version, lazydocker"
+echo "Docker is installed. The first start creates the VM and downloads an image, so give it a minute."
+echo "  colima status                     # is it running?"
+echo "  docker run --rm hello-world       # try it once it is"
+echo "  docker compose version, lazydocker"
+echo "Apple Silicon, to run amd64 images faster, create the VM with: colima start --vm-type vz --vz-rosetta"
+echo "  (VM settings are fixed when the VM is created; changing them later means 'colima delete' first.)"

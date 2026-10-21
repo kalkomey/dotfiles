@@ -103,8 +103,8 @@ Projects pick their own versions with `.tool-versions`, `mise.toml`,
 `docker/install.sh` installs the open-source Docker CLI, Colima (the VM that
 runs containers), `docker compose` and `docker buildx` as CLI plugins, and
 lazydocker. **We do not use Docker Desktop**: at our size its license requires a
-paid subscription. After installing, run `colima start` once (and
-`brew services start colima` to start it at login).
+paid subscription. The installer starts Colima and registers it to start at
+login (`brew services`); check it with `colima status`.
 
 ## custom install
 

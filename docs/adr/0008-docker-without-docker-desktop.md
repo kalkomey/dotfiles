@@ -45,7 +45,10 @@ block from `zshrc.symlink`.
 ## Consequences
 
 - No licensing exposure from the default setup.
-- Engineers must start the VM (`colima start`, optionally `brew services start colima`); there is no always-on app.
+- `docker/install.sh` runs `brew services start colima`, which registers a login agent: Colima starts now and again at each
+  login, so it is back after a reboot once you sign in. If Colima is already running from a manual `colima start`, the script
+  leaves it alone and prints the commands to switch (`colima stop && brew services start colima`), since stopping it would
+  stop running containers. The service takes no flags; the VM uses the settings saved for its profile.
 - Colima uses a VM with its own resource settings; Apple Silicon users who run amd64 images may want
   `--vm-type vz --vz-rosetta`.
 - We chose Colima without a trial on every team's workflow; teams with Docker Desktop-specific features (such as its
