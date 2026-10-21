@@ -1,7 +1,10 @@
 # Keep PATH and fpath free of duplicates (first occurrence wins), including entries
 # added later by mise, Homebrew and our topic files. `path` and `fpath` are the
-# array forms of PATH and FPATH.
-typeset -U path fpath
+# array forms of PATH and FPATH. PATH needs the flag too: `brew shellenv` and mise
+# assign it as a string, which only honors the flag on the scalar. The reassignment
+# drops duplicates the login shell already put there (~/.zprofile runs first).
+typeset -U PATH path fpath
+path=($path)
 
 # shortcut to this dotfiles path is $DOTHOME
 export DOTHOME=$HOME/.dotfiles
