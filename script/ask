@@ -75,6 +75,10 @@ print_plan() {
 require_macos
 ensure_prereqs
 load_saved_answers ask
+if [[ -n "$SAVED_VARS" ]] && ! dry; then
+  say "Using your saved answers from $CHOICES_FILE (questions you already answered are skipped)."
+  say "To be asked again: RECONFIGURE=1, or delete that file."
+fi
 
 ask_mise
 ask_fonts
@@ -86,5 +90,5 @@ if dry; then
 else
   save_answers
   normalize_answers
-  say "Answers saved to $CHOICES_FILE"
+  [[ -n "$SAVED_VARS" ]] || say "Answers saved to $CHOICES_FILE"
 fi
