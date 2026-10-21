@@ -67,5 +67,4 @@ echo "Docker is installed. The first start creates the VM and downloads an image
 echo "  colima status                     # is it running?"
 echo "  docker run --rm hello-world       # try it once it is"
 echo "  docker compose version, lazydocker"
-echo "Apple Silicon, to run amd64 images faster, create the VM with: colima start --vm-type vz --vz-rosetta"
-echo "  (VM settings are fixed when the VM is created; changing them later means 'colima delete' first.)"
+echo "Apple Silicon, to run amd64 images faster, turn on Rosetta: colima stop && colima start --vz-rosetta"
