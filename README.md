@@ -87,7 +87,17 @@ later include one; otherwise mise's). It is skipped when Claude Code is not
 installed, and it never overwrites: an existing `statusline.sh`, an existing
 `statusLine` setting, or a `settings.json` that is a symlink or not valid JSON is
 left as it is. Before it edits `settings.json` it saves a copy in
-`~/.dotfiles-backup/`. Run it on its own with `bash ~/.dotfiles/claude/install.sh`.
+`~/.dotfiles-backup/`.
+
+The same installer adds a small mod, `kalkomey-statusbar` (in `claude/mods`), that
+draws the same line above the prompt in the **Claude desktop app** (Code tab). It
+installs as a Claude Code plugin from a local marketplace, `kalkomey-dotfiles`,
+at user scope, so the terminal and the app share it; restart the app (or run
+`/reload-plugins`) to see it. It needs the `claude` command, so the installer
+skips it with a note when that is missing. Manage it with `/plugin`, or
+`claude plugin uninstall kalkomey-statusbar@kalkomey-dotfiles`. Keep `~/.dotfiles` in
+place, since the marketplace points at it. Run both steps on their own with
+`bash ~/.dotfiles/claude/install.sh`.
 
 ### languages, tools, and zsh plugins
 
