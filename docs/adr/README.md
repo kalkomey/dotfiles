@@ -22,6 +22,7 @@ one file per decision, numbered in the order they were made.
 | [0011](0011-nerd-fonts-chosen-from-homebrew.md) | Nerd Fonts chosen from what Homebrew offers | Accepted |
 | [0012](0012-never-overwrite-existing-dotfiles.md) | Never overwrite existing dotfiles: ask, back up, never delete | Accepted |
 | [0013](0013-one-line-installer.md) | One-line installer (`setup.sh`) that clones to `~/.dotfiles` | Accepted |
+| [0014](0014-do-not-change-macos-defaults.md) | Do not change macOS system defaults | Accepted |
 
 ## Adding one
 

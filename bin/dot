@@ -17,8 +17,6 @@ case $DISTRO in
     # so the slow steps below run unattended. Installs Xcode CLT, Homebrew and
     # mise first, because answers are validated against them.
     bash $DOTHOME/script/ask
-    # Set OS X defaults
-    sh $DOTHOME/osx/set-defaults.sh
     # Install/upgrade homebrew packages
     echo "Homebrew update"
     sh $DOTHOME/homebrew/install.sh 2>&1

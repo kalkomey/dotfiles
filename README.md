@@ -54,8 +54,7 @@ cp ~/.dotfiles/zsh/zshrc.local.example ~/.zshrc.local
 Never put tokens in a tracked file. Git settings work the same way, in
 `~/.gitconfig.local`.
 
-`dot` is a simple script that installs some dependencies, sets sane OS X
-defaults, and so on. Tweak this script, and occasionally run `dot` from
+`dot` is a simple script that installs dependencies, and so on. Tweak this script, and occasionally run `dot` from
 time to time to keep your environment fresh and up-to-date. You can find
 this script in `bin/`.
 
@@ -109,7 +108,7 @@ paid subscription. After installing, run `colima start` once (and
 
 ## custom install
 
-If you are using an alternative shell like fish, or alternative version manager software, some of the commands might not be a good fit for you. You might also want to ignore certain aliases or osx configuration changes to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`.
+If you are using an alternative shell like fish, or alternative version manager software, some of the commands might not be a good fit for you. You might also want to ignore certain aliases to fit your preferences. As a bare minimum you will need to have the `.dotfiles/bin` files in your path to set up a lot of repositories. You can accomplish this by cloning the repository and using whatever method your shell supports to add that folder to your path, for example `fish_add_path .dotfiles/bin`.
 ## topical
 
 Everything's built around topic areas. If you're adding a new area to your
