@@ -52,6 +52,10 @@ cdpath=(. ~ ~/src $SOURCE_DIR)
 # go, rust, et al
 export PATH="$HOME/.cargo/bin:$PATH"
 
+# User-level installs land in ~/.local/bin (Claude Code, pipx, uv, tools installed with
+# a curl script). Without this, replacing a ~/.zshrc that added it makes them vanish.
+[ -d "$HOME/.local/bin" ] && path=("$HOME/.local/bin" $path)
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export DOCKER_PLATFORM="linux/$(uname -m)"
