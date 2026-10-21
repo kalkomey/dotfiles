@@ -8,11 +8,10 @@ set -euo pipefail
 install_prelude
 
 # Libraries needed when a language (mostly Ruby) has to compile from source.
-BUILD_DEPS=(openssl@3 libyaml readline libffi gdbm zlib autoconf automake pkg-config)
+BUILD_DEPS=(openssl@3 libyaml readline libffi gdbm zlib autoconf automake pkgconf)
 
 if [[ -z "${SKIP_BREW_DEPS:-}" ]]; then
-  say "Installing build dependencies..."
-  brew install "${BUILD_DEPS[@]}"
+  brew_install_missing "${BUILD_DEPS[@]}"
 fi
 
 # People who already use mise have a global config. `mise use --global` edits it in

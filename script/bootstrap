@@ -170,7 +170,7 @@ fi
 install_dotfiles
 setup_zshrc_local
 
-info "installing dependencies"
+say "Installing dependencies..."
 if source bin/dot
 then
   success "dependencies installed"

@@ -15,8 +15,7 @@
 
 set -euo pipefail
 
-say()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
-warn() { printf '\033[1;33mwarn:\033[0m %s\n' "$*" >&2; }
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script/lib/common.sh"
 
 command -v brew >/dev/null 2>&1 || { echo "Please install Homebrew first. See: homebrew/install.sh" >&2; exit 1; }
 
@@ -27,8 +26,7 @@ if [[ -d /Applications/Docker.app ]] || brew list --cask docker >/dev/null 2>&1;
 fi
 
 # --- Install -----------------------------------------------------------------
-say "Installing docker, colima, docker-compose, docker-buildx, lazydocker..."
-brew install docker colima docker-compose docker-buildx lazydocker
+brew_install_missing docker colima docker-compose docker-buildx lazydocker
 
 # --- Register compose and buildx as Docker CLI plugins -----------------------
 # The Docker CLI finds plugins in ~/.docker/cli-plugins. Symlink to Homebrew's

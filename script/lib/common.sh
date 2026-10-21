@@ -135,6 +135,45 @@ ensure_prereqs() {
   t="$(mise_source_note)"; [[ -z "$t" ]] || warn "$t"
 }
 
+# quiet_run "message" cmd args...
+# Says what it is about to do, then runs the command with its output kept in a log.
+# Nothing more is printed on success; on failure it prints the tail of the log and
+# where the full log is. Stdin is closed, so a command that waits for a keypress
+# fails instead of hanging out of sight.
+quiet_run() {
+  local msg="$1" log
+  shift
+  say "$msg"
+  log="$(mktemp "${TMPDIR:-/tmp}/dotfiles.XXXXXX")"
+  if "$@" >"$log" 2>&1 </dev/null; then
+    rm -f "$log"
+    return 0
+  fi
+  warn "Failed: ${msg%...}. Last lines of its output:"
+  tail -n 25 "$log" >&2
+  echo "(full output: $log)" >&2
+  return 1
+}
+
+# brew_install_missing [--cask] name...
+# Installs only what is not installed yet, with Homebrew's output kept out of the
+# way. (Asking Homebrew to install something it already has just prints a warning.)
+# HOMEBREW_ASK is unset for the call so a hidden confirmation prompt cannot hang it.
+brew_install_missing() {
+  local kind=formula flag="" p installed missing=()
+  if [[ "${1:-}" == --cask ]]; then kind=cask; flag="--cask"; shift; fi
+  installed="$(brew list "--$kind" -1 2>/dev/null || true)"
+  for p in "$@"; do
+    grep -qxF -- "$p" <<<"$installed" || missing+=("$p")
+  done
+  if (( ${#missing[@]} == 0 )); then
+    say "Already installed: $*"
+    return 0
+  fi
+  # shellcheck disable=SC2086  # $flag is empty or --cask
+  quiet_run "Installing ${missing[*]}..." env -u HOMEBREW_ASK brew install $flag "${missing[@]}"
+}
+
 # Common start for every topic installer: load the saved answers (running
 # script/ask first if there are none), and make Homebrew and mise available.
 install_prelude() {

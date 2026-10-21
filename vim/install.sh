@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
+echo "Installing/updating vim plugins in ~/.vimbundles..."
 mkdir -p ~/.vimbundles
 cd ~/.vimbundles
 
 get_bundle() {
   (
   if [ -d "$2" ]; then
-    echo "Updating $1's $2"
     cd "$2"
-    git pull --rebase
+    git pull --quiet --rebase
   else
-    git clone "https://github.com/$1/$2.git"
+    git clone --quiet "https://github.com/$1/$2.git"
   fi
   )
 }

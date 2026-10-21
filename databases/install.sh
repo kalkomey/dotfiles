@@ -2,10 +2,8 @@
 
 BREW_COMMAND=$(which brew)
 
-echo
 echo "Force linking mysql and postgresql for their respective headers"
-echo
-${BREW_COMMAND} link --force --overwrite mysql@8.4
-${BREW_COMMAND} link --force --overwrite postgres
+${BREW_COMMAND} link --force --overwrite mysql@8.4 >/dev/null
+${BREW_COMMAND} link --force --overwrite postgres >/dev/null
 
 exit 0

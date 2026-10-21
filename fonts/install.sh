@@ -14,7 +14,6 @@ fi
 
 casks=()
 for f in $FONTS; do casks+=("font-$f-nerd-font"); done
-say "Installing Nerd Fonts: $FONTS"
-brew install --cask "${casks[@]}" || warn "Some fonts failed to install."
+brew_install_missing --cask "${casks[@]}" || warn "Some fonts failed to install."
 echo "  Set your terminal font to the family name, e.g. 'FiraCode Nerd Font' (see Font Book)."
 echo "  Ligatures: enable in iTerm2 (Profiles > Text > Use ligatures); Terminal.app has no ligature support."
