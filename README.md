@@ -76,6 +76,19 @@ there: oh-my-zsh plugins (it reads them when it loads, before `.zshrc.local`; ch
 them with `RECONFIGURE=1`, see below) and anything you want every engineer to
 have (change the repo instead).
 
+### Claude Code status line
+
+If you use [Claude Code](https://claude.com/claude-code), `claude/install.sh` links
+`claude/statusline.sh` to `~/.claude/statusline.sh` and adds a `statusLine` entry
+to `~/.claude/settings.json`. The status line shows the model, a context-usage
+bar, the session cost and its duration, for example
+`[Sonnet] ▓▓▓░░░░░░░ 37% ctx | $1.23 | 12m 34s`. It needs `jq` (macOS 15 and
+later include one; otherwise mise's). It is skipped when Claude Code is not
+installed, and it never overwrites: an existing `statusline.sh`, an existing
+`statusLine` setting, or a `settings.json` that is a symlink or not valid JSON is
+left as it is. Before it edits `settings.json` it saves a copy in
+`~/.dotfiles-backup/`. Run it on its own with `bash ~/.dotfiles/claude/install.sh`.
+
 ### languages, tools, and zsh plugins
 
 Languages and CLI tools are managed by [mise](https://mise.jdx.dev). `dot`
