@@ -15,7 +15,8 @@ entries no longer exist or are end of life (`mysql@5.7`, `openssl@1.1`, the `hom
 With languages and CLI tools moving to mise ([0002](0002-use-mise-for-runtimes-and-cli-tools.md)), the
 Brewfile keeps only what mise should not manage:
 
-- core system tools: git, gnupg, coreutils, wget, nmap
+- core system tools: git, gnupg, coreutils, wget, nmap, and mise itself (installed and upgraded like any Homebrew
+  package, and always in Homebrew's bin directory, which login shells have on `PATH`)
 - editors and terminal: vim, tmux, universal-ctags
 - native libraries for compiling Ruby extensions: openssl@3, libyaml, readline, libffi, gdbm; plus imagemagick
 - databases and services: memcached, redis, `mysql@8.4` (pinned; the current LTS), and `postgres`
@@ -24,7 +25,8 @@ Brewfile keeps only what mise should not manage:
 We removed what is obsolete or replaced: nvm, ruby-install, openssl@1.1, the compiler toolchain
 (autoconf, automake, bison, binutils, gcc, make, libksba), proctools, markdown, awslogs and amazon-ecs-cli
 (`aws logs tail` covers the first; the second is legacy), `reattach-to-user-namespace` (modern tmux does not
-need it, so the tmux config now calls `pbcopy` and `pbpaste` directly), and the built-in taps.
+need it, so the tmux config now calls `pbcopy` and `pbpaste` directly), the built-in taps, and the download of git's zsh completion into the repo (it rewrote the tracked `functions/_git`
+on every run, which made the checkout "dirty"; Homebrew's git installs its own completion, which already wins in `fpath`).
 
 ## Alternatives considered
 

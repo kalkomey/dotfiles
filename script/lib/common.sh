@@ -92,6 +92,18 @@ load_brew() {
   return 1
 }
 
+# Prints a note if mise is installed somewhere other than Homebrew (for example the
+# curl installer's ~/.local/bin): 'brew upgrade' will not update it, and a login
+# shell may not have its directory on PATH.
+mise_source_note() {
+  local m prefix
+  m="$(command -v mise 2>/dev/null || true)"
+  [[ -n "$m" ]] || return 0
+  prefix="$(brew --prefix 2>/dev/null || true)"
+  [[ -n "$prefix" && "$m" != "$prefix"/* ]] || return 0
+  printf "mise is at %s, not installed by Homebrew, so 'brew upgrade' will not update it. To switch: rm '%s' && brew install mise" "$m" "$m"
+}
+
 # Xcode CLT, Homebrew and mise. Under --dry-run this only looks.
 ensure_prereqs() {
   local t
@@ -100,6 +112,7 @@ ensure_prereqs() {
     for t in brew mise; do
       command -v "$t" >/dev/null 2>&1 || DRY_NOTES+=("$t is not installed, so checks that need it were skipped")
     done
+    t="$(mise_source_note)"; [[ -z "$t" ]] || DRY_NOTES+=("$t")
     return 0
   fi
 
@@ -119,6 +132,7 @@ ensure_prereqs() {
     say "Installing mise..."
     brew install mise
   fi
+  t="$(mise_source_note)"; [[ -z "$t" ]] || warn "$t"
 }
 
 # Common start for every topic installer: load the saved answers (running

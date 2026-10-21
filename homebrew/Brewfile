@@ -4,6 +4,7 @@
 # Docker (CLI, Colima, compose, lazydocker) is installed by docker/install.sh, not Docker Desktop.
 
 # Core
+brew "mise"   # manages the runtimes and CLI tools below; installed here so it is upgraded with Homebrew and lives in its bin dir
 brew "git"
 brew "gnupg"
 brew "coreutils"
