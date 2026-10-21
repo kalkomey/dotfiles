@@ -31,6 +31,10 @@ script/bootstrap
 Bootstrap will symlink the appropriate files in `.dotfiles` to your home directory.
 Everything is configured and tweaked within `~/.dotfiles`.
 
+`dot` is a simple script that installs dependencies, and so on. Tweak this script, and occasionally run `dot` from
+time to time to keep your environment fresh and up-to-date. You can find
+this script in `bin/`.
+
 ### already have dotfiles (or use stow)?
 
 Nothing you have is overwritten without asking. For each file that already
@@ -43,20 +47,34 @@ no terminal to ask on, your files are kept (`DOTFILES_LINK=new` to override).
 If you keep your `~/.zshrc`, the installer prints the lines to add so mise and
 the oh-my-zsh plugins load.
 
-Personal settings and secrets (API keys, tokens, your own aliases) go in
-`~/.zshrc.local`, which `zshrc.symlink` loads last and which is never committed.
-Start from the template:
+### customizing
+
+Your own settings go in `.local` files in your home directory. The repo's files
+load them last, so they win, and they are never committed, so updates never
+touch them. Making one takes a minute.
+
+| File | Loaded by | Good for |
+|---|---|---|
+| `~/.zshrc.local` | `.zshrc`, last | API keys and tokens, your aliases, functions, `cdpath` |
+| `~/.gitconfig.local` | `[include]` in `.gitconfig` | name, email, signing key, personal git settings |
+| `~/.vimrc.local` | `.vimrc`, last | your vim settings |
+| `~/.tmux.conf.local` | `.tmux.conf` | your tmux settings |
+| `~/.pryrc.local` | `.pryrc` | your pry settings |
+
+Bootstrap creates `~/.gitconfig.local` from the name and email it asks for, and
+`~/.zshrc.local` from [`zsh/zshrc.local.example`](zsh/zshrc.local.example) (a
+template with sections for env variables, aliases and functions). The others are
+optional: create one when you need it, for example
 
 ```sh
-cp ~/.dotfiles/zsh/zshrc.local.example ~/.zshrc.local
+echo 'alias gs="git status -sb"' >> ~/.zshrc.local
 ```
 
-Never put tokens in a tracked file. Git settings work the same way, in
-`~/.gitconfig.local`.
-
-`dot` is a simple script that installs dependencies, and so on. Tweak this script, and occasionally run `dot` from
-time to time to keep your environment fresh and up-to-date. You can find
-this script in `bin/`.
+then open a new terminal (or run `source ~/.zshrc`). Never put tokens in a
+tracked file; `~/.zshrc.local` is the place for them. Two things do not belong
+there: oh-my-zsh plugins (it reads them when it loads, before `.zshrc.local`; change
+them with `RECONFIGURE=1`, see below) and anything you want every engineer to
+have (change the repo instead).
 
 ### languages, tools, and zsh plugins
 
