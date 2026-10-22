@@ -52,6 +52,13 @@ fi
 # the VM uses whatever settings Colima has saved for its profile (~/.colima/default).
 if brew services list 2>/dev/null | awk '$1 == "colima" && $2 == "started" { f = 1 } END { exit !f }'; then
   say "Colima is already set to start at login."
+  # `started` only means the launchd job is alive, not that the VM is. If the VM
+  # has died, the job lingers in the foreground and nothing restarts it, so docker
+  # reports "no such file" for the socket until someone runs `colima start`.
+  if ! colima status >/dev/null 2>&1; then
+    quiet_run "Colima's VM is not running, starting it..." colima start \
+      || warn "Could not start Colima. Try it yourself: colima start"
+  fi
 elif colima status >/dev/null 2>&1; then
   # Started by hand. Starting the service now would fight with it, and stopping it
   # would stop your running containers, so leave that choice to the engineer.
