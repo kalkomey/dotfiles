@@ -1,3 +1,11 @@
+# Keep PATH and fpath free of duplicates (first occurrence wins), including entries
+# added later by mise, Homebrew and our topic files. `path` and `fpath` are the
+# array forms of PATH and FPATH. PATH needs the flag too: `brew shellenv` and mise
+# assign it as a string, which only honors the flag on the scalar. The reassignment
+# drops duplicates the login shell already put there (~/.zprofile runs first).
+typeset -U PATH path fpath
+path=($path)
+
 # shortcut to this dotfiles path is $DOTHOME
 export DOTHOME=$HOME/.dotfiles
 
@@ -44,38 +52,43 @@ cdpath=(. ~ ~/src $SOURCE_DIR)
 # go, rust, et al
 export PATH="$HOME/.cargo/bin:$PATH"
 
+# User-level installs land in ~/.local/bin (Claude Code, pipx, uv, tools installed with
+# a curl script). Without this, replacing a ~/.zshrc that added it makes them vanish.
+[ -d "$HOME/.local/bin" ] && path=("$HOME/.local/bin" $path)
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm on newer Homebrew installs
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
-
-if [ -d /opt/homebrew/opt ]; then
-  export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openssl@1.1/bin:$PATH"
-  export PATH="/opt/homebrew/sbin:$PATH"
-  export CPPFLAGS="-I/opt/homebrew/opt/libffi/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/readline/include -I/opt/homebrew/opt/binutils/include"
-  export LDFLAGS="-L/opt/homebrew/opt/bison/lib -L/opt/homebrew/opt/libffi/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/readline/lib -L/opt/homebrew/opt/binutils/lib"
-  export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:/opt/homebrew/opt/openssl@1.1/lib/pkgconfig:/opt/homebrew/opt/readline/lib/pkgconfig"
-  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
-else
-  export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-  export CPPFLAGS="-I/usr/local/opt/libffi/include -I/usr/local/opt/openssl@1.1/include -I/usr/local/opt/readline/include -I/usr/local/opt/binutils/include"
-  export LDFLAGS="-L/usr/local/opt/bison/lib -L/usr/local/opt/libffi/lib -L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/readline/lib -L/usr/local/opt/binutils/lib"
-  export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:/usr/local/opt/openssl@1.1/lib/pkgconfig:/usr/local/opt/readline/lib/pkgconfig"
-  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
-fi
 
 export DOCKER_PLATFORM="linux/$(uname -m)"
 
+# Homebrew, then mise, in that order. `brew shellenv` puts Homebrew's bin dirs at
+# the front of PATH, and `mise activate` then puts mise's tool dirs in front of
+# those, so the ruby/node/etc. you get are mise's, not copies Homebrew installed as
+# dependencies of other formulae. Don't move mise above this, and don't run
+# `brew shellenv` after it. (Homebrew's installer usually adds this line to
+# ~/.zprofile already; repeating it here is harmless and means this file does not
+# depend on that.)
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+# mise manages ruby, node, and CLI tools (see mise/install.sh). Activate it
+# before oh-my-zsh so tools it provides (fzf, direnv, zoxide) exist when plugins load.
 eval "$(mise activate zsh)"
+
+# oh-my-zsh. zsh/install.sh installs it and writes the chosen plugin list.
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+plugins=(git)
+[ -r "$HOME/.config/dotfiles/zsh-plugins.zsh" ] && source "$HOME/.config/dotfiles/zsh-plugins.zsh"
+[ -r "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
+
+# oh-my-zsh plugins define aliases that collide with ours (gc, gd, gca, ...).
+# Re-source ours so the dotfiles versions (e.g. signed commits) win.
+for f in $DOTHOME/**/aliases.zsh(N); do source $f; done
 
 # import local zsh customizations, if present
 zrcl="$HOME/.zshrc.local"
 
 [[ ! -a $zrcl ]] || source $zrcl
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/rsamour/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
-# End of Docker CLI completions

@@ -1,67 +1,32 @@
-tap "homebrew/bundle"
-tap "homebrew/services"
+# Language runtimes and CLI tools (node, ruby, terraform, vault, nomad, consul,
+# aws-cli, aws-vault, gh, jq, fzf, ripgrep, direnv, git-lfs, gron, yarn) are
+# managed by mise. See mise/install.sh. Only things mise can't/shouldn't manage live here.
+# Docker (CLI, Colima, compose, lazydocker) is installed by docker/install.sh, not Docker Desktop.
+# Desktop apps (Obsidian, Ghostty, Zed, ...) are chosen in script/ask and installed by apps/install.sh.
 
-# Text editors
-brew "ctags-exuberant"
-brew "markdown"
-brew "vim"
-
-# Terminal Tools
-brew "ack"
-brew "amazon-ecs-cli"
-brew "awscli"
-brew "coreutils"
-brew "fzf"
-brew "gh"
+# Core
+brew "mise"   # manages the runtimes and CLI tools below; installed here so it is upgraded with Homebrew and lives in its bin dir
 brew "git"
-brew "gpg"
-brew "gron"
-brew "hub"
-brew "jq"
-brew "nmap"
-brew "proctools"
-brew "reattach-to-user-namespace"
-brew "the_silver_searcher"
-brew "tmux"
+brew "gnupg"
+brew "coreutils"
 brew "wget"
-cask "aws-vault"
+brew "nmap"
 
-# Application Dependencies
-brew "autoconf"
-brew "automake"
-brew "awslogs"
-brew "binutils"
-brew "bison"
-brew "gcc"
-brew "gdbm" 
-brew "imagemagick"
-brew "libffi"
-brew "libksba"
-brew "libyaml"
-brew "make"
-brew "memcached"
-brew "openssl@1.1"
+# Editors & terminal
+brew "vim"
+brew "tmux"
+brew "universal-ctags"
+
+# Ruby native-extension dependencies (mise compiles Ruby from source if needed)
 brew "openssl@3"
+brew "libyaml"
 brew "readline"
+brew "libffi"
+brew "gdbm"
+brew "imagemagick"
+
+# Databases / services
+brew "memcached"
+brew "mysql@8.4"   # pinned (current LTS)
+brew "postgres"    # alias for the latest PostgreSQL; unused today, here to try out
 brew "redis"
-brew "ruby-install"
-
-# Hashicorp Tools
-brew "consul"
-brew "nomad"
-brew "vault"
-brew "tfenv"
-
-# Databases
-brew "mysql@5.7"
-brew "postgresql"
-
-# Javascript
-brew "nvm"
-brew "yarn"
-
-# git
-brew "git-lfs"
-
-# Platform Tools
-brew "direnv"

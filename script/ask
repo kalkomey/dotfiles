@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+#
+# Ask every install question up front, so the slow installers that follow run
+# unattended. Installs the prerequisites first (Xcode CLT, Homebrew, mise) because
+# answers are validated against them, then asks about:
+#
+#   mise/    languages and CLI tools
+#   fonts/   Nerd Fonts
+#   apps/    desktop applications (Homebrew casks)
+#   neovim/  Neovim + LazyVim (opt-in)
+#   zsh/     oh-my-zsh plugins
+#
+# Answers are saved to ~/.config/dotfiles/install-choices and reused silently on
+# later runs. Each topic's install.sh reads them.
+#
+# Usage: script/ask [--dry-run]
+#
+#   --dry-run, -n   Ask the questions, print the resulting choices, and stop.
+#                   Nothing is installed (not even Xcode CLT, Homebrew or mise;
+#                   without them the font list and name/version checks are limited)
+#                   and nothing is saved. Also DRY_RUN=1.
+#
+# Overrides (env vars; these skip the matching question):
+#   MISE_LANGUAGES="ruby@4.0.6 node@lts"   languages to install globally
+#   MISE_TOOLS="jq ripgrep ..."            CLI tools to install globally
+#   FONTS="fira-code dejavu-sans-mono"     Nerd Fonts ("none" for no fonts)
+#   APPS="obsidian zed"                    desktop apps, by Homebrew cask name ("none" for no apps)
+#   NEOVIM=1|0                             Neovim + LazyVim (default: ask, then no)
+#   ZSH_PLUGINS="git gh ..."               oh-my-zsh plugins (syntax-highlighting last)
+#   ZOXIDE_CD=1|0                          replace cd with zoxide via ~/.zshenv (default: ask, then no)
+#   SKIP_ZSH=1                             skip the oh-my-zsh question and install
+#   SKIP_BREW_DEPS=1                       (mise/install.sh) skip build-library install
+#   RECONFIGURE=1                          ignore saved answers and ask again
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+. "$ROOT/script/lib/common.sh"
+for topic in mise fonts apps neovim zsh; do . "$ROOT/$topic/ask.sh"; done
+
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run|-n) DRY_RUN=1 ;;
+    -h|--help)    sed -n '2,/^set -/p' "$0" | sed '$d; s/^# \{0,1\}//'; exit 0 ;;
+    *) echo "usage: $0 [--dry-run]" >&2; exit 2 ;;
+  esac
+done
+
+print_plan() {
+  normalize_answers
+  derive_answers
+  local casks="" f
+  for f in $FONTS; do casks="$casks font-$f-nerd-font"; done
+  echo
+  say "Dry run: nothing was installed or saved. Choices:"
+  printf '  %-15s %s\n' "MISE_LANGUAGES" "$MISE_LANGUAGES"
+  printf '  %-15s %s\n' "MISE_TOOLS" "$MISE_TOOLS"
+  printf '  %-15s %s\n' "FONTS" "${FONTS:-none}${casks:+  (casks:$casks)}"
+  printf '  %-15s %s\n' "APPS" "${APPS:-none}"
+  printf '  %-15s %s\n' "NEOVIM""$NEOVIM$([[ "$NEOVIM" == 1 ]] && echo '  (installs neovim, fd, lazygit; LazyVim starter -> ~/.config/nvim'"$([[ -e "${XDG_CONFIG_HOME:-$HOME/.config}/nvim" ]] && echo ', which exists and is left alone')"')')"
+  if [[ -n "${SKIP_ZSH:-}" ]]; then
+    printf '  %-15s %s\n' "ZSH_PLUGINS" "(skipped: SKIP_ZSH)"
+  else
+    printf '  %-15s %s\n' "ZSH_PLUGINS" "${ZSH_PLUGINS:-}"
+    printf '  %-15s %s\n' "ZOXIDE_CD" "$ZOXIDE_CD$([[ "$ZOXIDE_CD" == 1 ]] && echo '  (adds ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv)')"
+  fi
+  if (( ${#DERIVED[@]} )); then
+    echo
+    echo "  Added automatically at install time:"
+    for f in "${DERIVED[@]}"; do echo "    + $f"; done
+  fi
+  if (( ${#DRY_NOTES[@]} )); then
+    echo
+    for f in "${DRY_NOTES[@]}"; do warn "$f"; done
+  fi
+}
+
+require_macos
+ensure_prereqs
+load_saved_answers ask
+if [[ -n "$SAVED_VARS" ]] && ! dry; then
+  say "Using your saved answers from $CHOICES_FILE (questions you already answered are skipped)."
+  say "To be asked again: RECONFIGURE=1, or delete that file."
+fi
+
+ask_mise
+ask_fonts
+ask_apps
+ask_neovim
+ask_zsh
+
+if dry; then
+  print_plan
+else
+  save_answers
+  normalize_answers
+  [[ -n "$SAVED_VARS" ]] || say "Answers saved to $CHOICES_FILE"
+fi
