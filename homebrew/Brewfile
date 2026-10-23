@@ -29,3 +29,6 @@ brew "memcached"
 brew "mysql@8.4"   # pinned (current LTS)
 brew "postgres"    # alias for the latest PostgreSQL; unused today, here to try out
 brew "redis"
+
+# Applications
+cask "obsidian"
