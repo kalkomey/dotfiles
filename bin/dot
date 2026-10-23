@@ -13,7 +13,7 @@ case $DISTRO in
     sudo apt-get -y -q upgrade
     ;;
   'Darwin')
-    # Ask every question up front (languages, tools, fonts, Neovim, zsh plugins)
+    # Ask every question up front (languages, tools, fonts, apps, Neovim, zsh plugins)
     # so the slow steps below run unattended. Installs Xcode CLT, Homebrew and
     # mise first, because answers are validated against them.
     bash $DOTHOME/script/ask
@@ -27,6 +27,8 @@ case $DISTRO in
     bash $DOTHOME/mise/install.sh 2>&1
     echo "Fonts update"
     bash $DOTHOME/fonts/install.sh 2>&1
+    echo "Applications update"
+    bash $DOTHOME/apps/install.sh 2>&1
     echo "Neovim update"
     bash $DOTHOME/neovim/install.sh 2>&1
     echo "oh-my-zsh update"

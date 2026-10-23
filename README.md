@@ -103,7 +103,7 @@ place, since the marketplace points at it. Run both steps on their own with
 
 Languages and CLI tools are managed by [mise](https://mise.jdx.dev). `dot`
 first runs `script/ask`, which asks everything up front (and offers sensible
-defaults), then runs one installer per topic (`mise/`, `fonts/`, `neovim/`,
+defaults), then runs one installer per topic (`mise/`, `fonts/`, `apps/`, `neovim/`,
 `zsh/`) from your answers. The questions cover:
 
 - **languages** — Ruby 4.0.6 (our baseline) and Node LTS are on by default;
@@ -122,6 +122,13 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `neovim/`,
   terminal font to the family name, e.g. "FiraCode Nerd Font", and turn on
   ligatures if your terminal has a setting (iTerm2 does; Terminal.app has no
   ligature support).
+- **Applications** — Homebrew casks, listed by cask name: cmux, ghostty, kitty,
+  obsidian, rectangle, sequel-ace, sublime-text, tldraw and zed. None is on by default,
+  because IT's machine image already installs the standard apps. Type any
+  other cask name (for example `raycast`) to add it; it is
+  checked against Homebrew before anything installs. An app already in
+  `/Applications` is adopted by Homebrew rather than reinstalled. Set
+  `APPS="obsidian zed"` to skip the question, or `APPS=none` for no apps.
 - **Neovim + LazyVim** — optional (off by default). Installs Neovim, `fd`,
   `lazygit`, and the LazyVim starter into `~/.config/nvim` (skipped if that
   directory already exists). LazyVim wants a Nerd Font, so pick one above. Run

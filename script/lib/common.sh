@@ -25,7 +25,7 @@ require_macos() {
 # Answers live outside the repo so personal choices are never committed.
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
 CHOICES_FILE="$CONFIG_DIR/install-choices"
-ANSWER_VARS="MISE_LANGUAGES MISE_TOOLS ZSH_PLUGINS ZOXIDE_CD NEOVIM FONTS"
+ANSWER_VARS="MISE_LANGUAGES MISE_TOOLS ZSH_PLUGINS ZOXIDE_CD NEOVIM FONTS APPS"
 SAVED_VARS=""
 
 # load_saved_answers [install]
@@ -46,7 +46,7 @@ load_saved_answers() {
   done
 }
 
-# FONTS is "none", not empty, when no fonts were chosen (empty means "unanswered").
+# FONTS and APPS are "none", not empty, when nothing was chosen (empty means "unanswered").
 save_answers() {
   mkdir -p "$CONFIG_DIR"
   {
@@ -56,6 +56,7 @@ save_answers() {
     echo "ZOXIDE_CD=${ZOXIDE_CD:-0}"
     echo "NEOVIM=$NEOVIM"
     echo "FONTS=${FONTS:-none}"
+    echo "APPS=${APPS:-none}"
   } > "$CHOICES_FILE"
 }
 
@@ -65,6 +66,8 @@ normalize_answers() {
   NEOVIM="${NEOVIM:-0}"
   FONTS="${FONTS:-none}"
   [[ "$FONTS" != none ]] || FONTS=""
+  APPS="${APPS:-none}"
+  [[ "$APPS" != none ]] || APPS=""
 }
 
 # Things implied by the answers rather than asked. Each addition is recorded in
@@ -159,6 +162,7 @@ quiet_run() {
 # Installs only what is not installed yet, with Homebrew's output kept out of the
 # way. (Asking Homebrew to install something it already has just prints a warning.)
 # HOMEBREW_ASK is unset for the call so a hidden confirmation prompt cannot hang it.
+# BREW_INSTALL_FLAGS (optional, space-separated) is added to the `brew install` call.
 brew_install_missing() {
   local kind=formula flag="" p installed missing=()
   if [[ "${1:-}" == --cask ]]; then kind=cask; flag="--cask"; shift; fi
@@ -170,8 +174,8 @@ brew_install_missing() {
     say "Already installed: $*"
     return 0
   fi
-  # shellcheck disable=SC2086  # $flag is empty or --cask
-  quiet_run "Installing ${missing[*]}..." env -u HOMEBREW_ASK brew install $flag "${missing[@]}"
+  # shellcheck disable=SC2086  # $flag is empty or --cask; BREW_INSTALL_FLAGS is a word list
+  quiet_run "Installing ${missing[*]}..." env -u HOMEBREW_ASK brew install $flag ${BREW_INSTALL_FLAGS:-} "${missing[@]}"
 }
 
 # Common start for every topic installer: load the saved answers (running
@@ -196,6 +200,9 @@ can_prompt() { { : </dev/tty; } 2>/dev/null; }
 
 # True if Homebrew has the Nerd Font cask for a short name (fira-code -> font-fira-code-nerd-font).
 valid_font() { { dry && ! command -v brew >/dev/null 2>&1; } && return 0; brew info --cask "font-$1-nerd-font" >/dev/null 2>&1; }
+
+# True if Homebrew has a cask with this name (for the Applications picker).
+valid_cask() { { dry && ! command -v brew >/dev/null 2>&1; } && return 0; brew info --cask "$1" >/dev/null 2>&1; }
 
 # True if mise can resolve the spec (tool name and, if given, version).
 # "latest"/"lts"/"stable" are aliases `mise latest` may not accept for every
@@ -237,8 +244,11 @@ pick_items() {
       echo "  Type numbers to select or deselect (e.g. 3 4)."
       echo "  Type name@version for a specific version (e.g. ruby@4.0.7), or to add a tool not in the list (e.g. php@8.4, zig@latest)."
     else
-      if [[ "$validate" == 2 ]]; then echo "  Toggle: numbers (e.g. 4 5)   Add another Nerd Font by short name (e.g. hack)"
-      else echo "  Toggle: numbers (e.g. 4 5)   Add any mise tool: name (e.g. bat, yq)"; fi
+      case "$validate" in
+        2) echo "  Toggle: numbers (e.g. 4 5)   Add another Nerd Font by short name (e.g. hack)" ;;
+        3) echo "  Toggle: numbers (e.g. 4 5)   Add any Homebrew cask by name (e.g. raycast, iterm2)" ;;
+        *) echo "  Toggle: numbers (e.g. 4 5)   Add any mise tool: name (e.g. bat, yq)" ;;
+      esac
     fi
     if (( shown < base )); then
       echo "  'm' = show more ($((base - shown)) more available)"
@@ -250,12 +260,14 @@ pick_items() {
       # On accept, check anything the user typed or edited against mise so a
       # typo is caught now, not after a long compile.
       bad=0
-      if [[ "$validate" == 1 || "$validate" == 2 ]]; then
+      if [[ "$validate" == 1 || "$validate" == 2 || "$validate" == 3 ]]; then
         for i in "${!ITEM_NAMES[@]}"; do
           [[ "${ITEM_ON[$i]}" == 1 && "${ITEM_CHK[$i]:-0}" == 1 ]] || continue
           if [[ "$versions" == 1 ]]; then spec="${ITEM_NAMES[$i]}@${ITEM_VERS[$i]}"; else spec="${ITEM_NAMES[$i]}"; fi
           if [[ "$validate" == 2 ]]; then
             valid_font "$spec" || { warn "No Nerd Font cask 'font-$spec-nerd-font' in Homebrew. Fix it, or toggle it off."; bad=1; }
+          elif [[ "$validate" == 3 ]]; then
+            valid_cask "$spec" || { warn "No Homebrew cask named '$spec'. Fix it, or toggle it off."; bad=1; }
           elif ! valid_spec "$spec"; then
             warn "'$spec' not found in mise (check the name/version). Fix it, or toggle it off."
             bad=1
@@ -330,6 +342,11 @@ resolve_choice() {
     if [[ "$validate" == 1 && " $SAVED_VARS " != *" $var "* ]]; then
       for spec in ${!var}; do
         valid_spec "$spec" || { warn "$var: '$spec' not found in mise"; bad=1; }
+      done
+      (( bad == 0 )) || die "Fix $var and re-run."
+    elif [[ "$validate" == 3 && " $SAVED_VARS " != *" $var "* ]]; then
+      for spec in ${!var}; do
+        valid_cask "$spec" || { warn "$var: no Homebrew cask named '$spec'"; bad=1; }
       done
       (( bad == 0 )) || die "Fix $var and re-run."
     fi

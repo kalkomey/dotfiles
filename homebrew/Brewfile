@@ -2,6 +2,7 @@
 # aws-cli, aws-vault, gh, jq, fzf, ripgrep, direnv, git-lfs, gron, yarn) are
 # managed by mise. See mise/install.sh. Only things mise can't/shouldn't manage live here.
 # Docker (CLI, Colima, compose, lazydocker) is installed by docker/install.sh, not Docker Desktop.
+# Desktop apps (Obsidian, Ghostty, Zed, ...) are chosen in script/ask and installed by apps/install.sh.
 
 # Core
 brew "mise"   # manages the runtimes and CLI tools below; installed here so it is upgraded with Homebrew and lives in its bin dir
@@ -29,6 +30,3 @@ brew "memcached"
 brew "mysql@8.4"   # pinned (current LTS)
 brew "postgres"    # alias for the latest PostgreSQL; unused today, here to try out
 brew "redis"
-
-# Applications
-cask "obsidian"

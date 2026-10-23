@@ -24,6 +24,7 @@ one file per decision, numbered in the order they were made.
 | [0013](0013-one-line-installer.md) | One-line installer (`setup.sh`) that clones to `~/.dotfiles` | Accepted |
 | [0014](0014-do-not-change-macos-defaults.md) | Do not change macOS system defaults | Accepted |
 | [0015](0015-claude-desktop-status-bar-as-a-mod.md) | Claude desktop status bar as a mod | Accepted |
+| [0016](0016-desktop-apps-chosen-in-script-ask.md) | Desktop apps are chosen in `script/ask`, not listed in the Brewfile | Accepted |
 
 ## Adding one
 
