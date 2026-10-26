@@ -80,6 +80,12 @@ derive_answers() {
     MISE_LANGUAGES="erlang@latest $MISE_LANGUAGES"
     DERIVED+=("language erlang@latest (required by elixir)")
   fi
+  # mise installs yamllint from PyPI, which needs uv (or pipx). Without uv the
+  # install fails, so add it in the same call.
+  if [[ " $MISE_TOOLS " == *" yamllint"* && " $MISE_TOOLS " != *" uv"* ]]; then
+    MISE_TOOLS="uv $MISE_TOOLS"
+    DERIVED+=("tool uv (required by yamllint)")
+  fi
   if [[ " $MISE_LANGUAGES " == *" erlang"* ]]; then
     export KERL_CONFIGURE_OPTIONS="${KERL_CONFIGURE_OPTIONS:---without-javac --without-wx --without-odbc}"
   fi
