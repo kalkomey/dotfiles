@@ -19,10 +19,11 @@ LANG_DESCS=(
 LANG_VERS=(4.0.6 lts latest latest latest lts latest)
 LANG_ON=(1 1 0 0 0 0 0)
 
-TOOL_NAMES=(aws-cli aws-vault consul direnv fzf gh git-lfs gron jq nomad ripgrep terraform trivy vault yamllint yarn zoxide)
+TOOL_NAMES=(aws-cli aws-vault aqua:aws/session-manager-plugin consul direnv fzf gh git-lfs gron jq nomad ripgrep terraform trivy vault yamllint yarn zoxide)
 TOOL_DESCS=(
   "AWS CLI"
   "Credential manager for AWS profiles"
+  "AWS Session Manager plugin (aws ssm start-session, bin/ssm-connect)"
   "HashiCorp Consul"
   "Per-directory environment variables"
   "Fuzzy finder"
@@ -40,7 +41,7 @@ TOOL_DESCS=(
   "Smarter cd that learns your directories (z); enabled by the zoxide zsh plugin"
 )
 TOOL_VERS=()
-TOOL_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
+TOOL_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
 
 ask_mise() {
   resolve_choice MISE_LANGUAGES LANG "Languages (installed globally via mise):" 1 1
