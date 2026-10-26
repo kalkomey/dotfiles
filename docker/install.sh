@@ -17,7 +17,7 @@ set -euo pipefail
 
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script/lib/common.sh"
 
-command -v brew >/dev/null 2>&1 || { echo "Please install Homebrew first. See: homebrew/install.sh" >&2; exit 1; }
+load_brew || die "Homebrew is not installed. Run script/ask (it installs Homebrew), or bin/dot."
 
 # --- Refuse to quietly coexist with Docker Desktop ---------------------------
 if [[ -d /Applications/Docker.app ]] || brew list --cask docker >/dev/null 2>&1; then

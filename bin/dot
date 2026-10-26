@@ -17,9 +17,17 @@ case $DISTRO in
     # so the slow steps below run unattended. Installs Xcode CLT, Homebrew and
     # mise first, because answers are validated against them.
     bash $DOTHOME/script/ask
+    # script/ask may have just installed Homebrew in its own process, so this
+    # shell's PATH does not have it yet. Put it there for the steps below.
+    for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+      if [ -x "$brew_bin" ]; then
+        eval "$("$brew_bin" shellenv)"
+        break
+      fi
+    done
     # Install/upgrade homebrew packages
     echo "Homebrew update"
-    sh $DOTHOME/homebrew/install.sh 2>&1
+    bash $DOTHOME/homebrew/install.sh 2>&1
     echo "Docker update (Colima + CLI; not Docker Desktop)"
     bash $DOTHOME/docker/install.sh 2>&1
     # Languages (ruby, node, ...) and CLI tools via mise
@@ -37,7 +45,7 @@ case $DISTRO in
     bash $DOTHOME/claude/install.sh 2>&1
     # Symlink databases
     echo "Database(s) update"
-    sh $DOTHOME/databases/install.sh 2>&1
+    bash $DOTHOME/databases/install.sh 2>&1
     ;;
   *)
     echo "Good luck with that"

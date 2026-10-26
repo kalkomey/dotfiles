@@ -1,31 +1,15 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 #
-# Homebrew
+# Homebrew: install the packages in the Brewfile.
 #
-# This installs some of the common dependencies needed (or at least desired)
-# using Homebrew.
+# Homebrew itself is installed by script/ask (it needs it to check your answers),
+# so this does not install it again; it only finds it and runs `brew bundle`.
 
-BREW_COMMAND=$(which brew)
+set -euo pipefail
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script/lib/common.sh"
 
-# Check for Homebrew
-if test ! $(which brew)
-then
-  sudo xcodebuild -license
-  xcode-select -p
-  if [[ "$?" -eq "2" ]]; then
-    sudo xcode-select --install
-    echo
-    echo "Please install 'Command Line Tools for Xcode' (follow instructions on window prompt)"
-    echo
-    echo "Press any key to continue…"
-    read
-  fi
-  echo "  Installing Homebrew for you."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
+load_brew || die "Homebrew is not installed. Run script/ask (it installs Homebrew), or bin/dot."
 
-${BREW_COMMAND} bundle --file ${HOME}/.dotfiles/homebrew/Brewfile install
+brew bundle --file "$DOTFILES_ROOT/homebrew/Brewfile" install
 
 touch "${HOME}/.tmux.conf.local"
-
-exit 0

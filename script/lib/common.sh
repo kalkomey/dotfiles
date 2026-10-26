@@ -132,8 +132,18 @@ ensure_prereqs() {
   fi
 
   if ! load_brew; then
-    say "Installing Homebrew..."
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Homebrew's installer needs administrator access, and in NONINTERACTIVE mode it
+    # will not ask for it. Ask now (sudo prompts on the terminal even though the
+    # installer's output is hidden), so the install below finds sudo already unlocked.
+    if can_prompt; then
+      say "Homebrew needs administrator access; you may be asked for your password."
+      sudo -v || die "Homebrew's installer needs administrator access."
+    fi
+    # Its output is kept in a log: the closing "donate" and "Next steps" text does
+    # not apply here, because this installer already puts Homebrew on PATH (zsh/install.sh).
+    quiet_run "Installing Homebrew..." env NONINTERACTIVE=1 /bin/bash -c \
+      'set -o pipefail; curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | /bin/bash' \
+      || die "Could not install Homebrew."
     load_brew || die "Homebrew installed but not found on PATH."
   fi
 
