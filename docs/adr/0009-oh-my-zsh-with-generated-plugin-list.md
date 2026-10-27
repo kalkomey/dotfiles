@@ -30,6 +30,10 @@ Two constraints shape how:
   interactive shells get them through `mise activate`. Both follow the same mise config, so the versions match.
   It goes in `~/.zprofile`, not `~/.zshenv`, because `/etc/zprofile` (macOS `path_helper`) reorders `PATH` after
   `.zshenv` runs and would put system tools ahead of the shims.
+- oh-my-zsh is itself a question in `script/ask` (`OHMYZSH`, default yes). Answering no skips the plugin and zoxide
+  questions and the oh-my-zsh install, and `zsh/install.sh` writes `DOTFILES_OHMYZSH=0` to the generated file instead of
+  a plugin list. `zshrc.symlink` then does not source oh-my-zsh, even when `~/.oh-my-zsh` exists. The `~/.zprofile`
+  block below is written either way. Answers saved before this question existed have plugins but no `OHMYZSH`, and count as yes.
 - After oh-my-zsh loads, `zshrc.symlink` re-sources every `aliases.zsh` so our aliases override the plugins'.
 - The default plugins are `git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv zoxide tmux macos`
   plus the two external ones, with `zsh-syntax-highlighting` last. Engineers choose their own in the picker

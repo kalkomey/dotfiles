@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# zsh topic: which oh-my-zsh plugins to enable. Sourced by script/ask.
+# zsh topic: whether to install oh-my-zsh and, if so, which plugins to enable.
+# Sourced by script/ask.
 
 PLUGIN_NAMES=(git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv zoxide tmux macos zsh-autosuggestions zsh-syntax-highlighting)
 PLUGIN_DESCS=(
@@ -27,6 +28,25 @@ PLUGIN_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
 
 ask_zsh() {
   [[ -z "${SKIP_ZSH:-}" ]] || return 0
+
+  # oh-my-zsh is optional. Answers saved before this question existed have a plugin
+  # list but no OHMYZSH, and a ZSH_PLUGINS override says the same thing: both mean yes.
+  # With no terminal to ask on, the default is yes, as it was before it was optional.
+  if [[ -z "${OHMYZSH:-}" ]]; then
+    OHMYZSH=1
+    if [[ -z "${ZSH_PLUGINS:-}" ]] && can_prompt; then
+      echo
+      read -r -p "Install oh-my-zsh (a zsh framework with plugins for git, aws, docker and more)? [Y/n] " ans </dev/tty || ans=""
+      [[ ! "$ans" =~ ^[Nn] ]] || OHMYZSH=0
+    fi
+  fi
+  # No oh-my-zsh, so no plugins to choose and nothing for zoxide to take over `cd` through.
+  if [[ "$OHMYZSH" == 0 ]]; then
+    ZSH_PLUGINS=""
+    ZOXIDE_CD=0
+    return 0
+  fi
+
   resolve_choice ZSH_PLUGINS PLUGIN "oh-my-zsh plugins:" 0 0
 
   # zoxide can take over `cd` (z/zi are always defined). Only worth asking if the

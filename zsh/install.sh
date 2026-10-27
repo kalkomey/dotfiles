@@ -1,55 +1,68 @@
 #!/usr/bin/env bash
 #
-# oh-my-zsh and the chosen plugins. zsh/zshrc.symlink loads oh-my-zsh and reads
-# the plugin list written here. Reads the answers saved by script/ask.
+# oh-my-zsh (if you chose it) and the chosen plugins. zsh/zshrc.symlink loads
+# oh-my-zsh and reads the plugin list written here. Reads the answers saved by
+# script/ask. The ~/.zprofile block (Homebrew + mise shims) is written either way.
 
 set -euo pipefail
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script/lib/common.sh"
 install_prelude
 
 if [[ -n "${SKIP_ZSH:-}" ]]; then
-  say "SKIP_ZSH set; skipping oh-my-zsh."
+  say "SKIP_ZSH set; skipping oh-my-zsh and shell setup."
   exit 0
 fi
 
-export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
+install_ohmyzsh() {
+  export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
 
-if [[ ! -d "$ZSH" ]]; then
-  # Download first, so a failed download is an error and not an empty script that "succeeds".
-  omz_installer="$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
-    || die "Could not download the oh-my-zsh installer."
-  # RUNZSH/CHSH stop it starting a shell or changing yours; KEEP_ZSHRC keeps our .zshrc.
-  # Its banner and clone progress go to a log, shown only if it fails.
-  quiet_run "Installing oh-my-zsh..." env RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$omz_installer"
-fi
-
-ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$ZSH/custom}"
-for repo in zsh-users/zsh-autosuggestions zsh-users/zsh-syntax-highlighting; do
-  # Only fetch external plugins the user selected.
-  [[ " $ZSH_PLUGINS " == *" ${repo#*/} "* ]] || continue
-  dest="$ZSH_CUSTOM_DIR/plugins/${repo#*/}"
-  if [[ -d "$dest" ]]; then
-    git -C "$dest" pull --quiet --ff-only || true
-  else
-    say "Installing plugin ${repo#*/}..."
-    git clone --quiet --depth 1 "https://github.com/$repo.git" "$dest"
+  if [[ ! -d "$ZSH" ]]; then
+    # Download first, so a failed download is an error and not an empty script that "succeeds".
+    omz_installer="$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+      || die "Could not download the oh-my-zsh installer."
+    # RUNZSH/CHSH stop it starting a shell or changing yours; KEEP_ZSHRC keeps our .zshrc.
+    # Its banner and clone progress go to a log, shown only if it fails.
+    quiet_run "Installing oh-my-zsh..." env RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$omz_installer"
   fi
-done
 
-# Replace `cd` with zoxide. The oh-my-zsh zoxide plugin reads ZOXIDE_CMD_OVERRIDE,
-# and ~/.zshenv is read before ~/.zshrc. Append (or create) it, once.
-if [[ "${ZOXIDE_CD:-0}" == 1 && " $ZSH_PLUGINS " == *" zoxide "* ]]; then
-  if [[ -L "$HOME/.zshenv" ]]; then
-    # Appending would write through the link into someone's dotfiles repo (stow).
-    warn "~/.zshenv is a symlink to $(readlink "$HOME/.zshenv"); not editing it. Add this line to it yourself: export ZOXIDE_CMD_OVERRIDE=cd"
-  elif grep -qs '^export ZOXIDE_CMD_OVERRIDE=' "$HOME/.zshenv"; then
-    say "~/.zshenv already sets ZOXIDE_CMD_OVERRIDE; leaving it."
-  else
-    say "Adding ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv"
-    # Keep a prior file's last line intact if it lacks a trailing newline.
-    [[ ! -s "$HOME/.zshenv" || -z "$(tail -c1 "$HOME/.zshenv")" ]] || echo >> "$HOME/.zshenv"
-    echo 'export ZOXIDE_CMD_OVERRIDE=cd' >> "$HOME/.zshenv"
+  ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$ZSH/custom}"
+  for repo in zsh-users/zsh-autosuggestions zsh-users/zsh-syntax-highlighting; do
+    # Only fetch external plugins the user selected.
+    [[ " $ZSH_PLUGINS " == *" ${repo#*/} "* ]] || continue
+    dest="$ZSH_CUSTOM_DIR/plugins/${repo#*/}"
+    if [[ -d "$dest" ]]; then
+      git -C "$dest" pull --quiet --ff-only || true
+    else
+      say "Installing plugin ${repo#*/}..."
+      git clone --quiet --depth 1 "https://github.com/$repo.git" "$dest"
+    fi
+  done
+
+  # Replace `cd` with zoxide. The oh-my-zsh zoxide plugin reads ZOXIDE_CMD_OVERRIDE,
+  # and ~/.zshenv is read before ~/.zshrc. Append (or create) it, once.
+  if [[ "${ZOXIDE_CD:-0}" == 1 && " $ZSH_PLUGINS " == *" zoxide "* ]]; then
+    if [[ -L "$HOME/.zshenv" ]]; then
+      # Appending would write through the link into someone's dotfiles repo (stow).
+      warn "~/.zshenv is a symlink to $(readlink "$HOME/.zshenv"); not editing it. Add this line to it yourself: export ZOXIDE_CMD_OVERRIDE=cd"
+    elif grep -qs '^export ZOXIDE_CMD_OVERRIDE=' "$HOME/.zshenv"; then
+      say "~/.zshenv already sets ZOXIDE_CMD_OVERRIDE; leaving it."
+    else
+      say "Adding ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv"
+      # Keep a prior file's last line intact if it lacks a trailing newline.
+      [[ ! -s "$HOME/.zshenv" || -z "$(tail -c1 "$HOME/.zshenv")" ]] || echo >> "$HOME/.zshenv"
+      echo 'export ZOXIDE_CMD_OVERRIDE=cd' >> "$HOME/.zshenv"
+    fi
   fi
+}
+
+if [[ "$OHMYZSH" == 0 ]]; then
+  if [[ -d "${ZSH:-$HOME/.oh-my-zsh}" ]]; then
+    say "You skipped oh-my-zsh; ${ZSH:-$HOME/.oh-my-zsh} is left in place but .zshrc will not load it."
+  else
+    say "You skipped oh-my-zsh; not installing it."
+  fi
+else
+  install_ohmyzsh
 fi
 
 # mise shims for login shells, scripts, git hooks and IDE tasks. ~/.zshrc only runs
@@ -84,5 +97,10 @@ mkdir -p "$CONFIG_DIR"
 say "Writing $CONFIG_DIR/zsh-plugins.zsh"
 {
   echo "# Generated by zsh/install.sh; run script/ask with RECONFIGURE=1 to change."
-  echo "plugins=($ZSH_PLUGINS)"
+  if [[ "$OHMYZSH" == 0 ]]; then
+    # zsh/zshrc.symlink skips oh-my-zsh when it sees this, even if ~/.oh-my-zsh exists.
+    echo "DOTFILES_OHMYZSH=0"
+  else
+    echo "plugins=($ZSH_PLUGINS)"
+  fi
 } > "$CONFIG_DIR/zsh-plugins.zsh"

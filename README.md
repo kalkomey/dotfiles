@@ -111,7 +111,11 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `apps/`, `neovi
   mise tool as `name@version` (or `name@latest`). Entries are checked against
   mise before anything installs.
 - **CLI tools** — aws-cli, gh, jq, ripgrep, terraform, vault, etc.
-- **oh-my-zsh plugins** — `git` and friends. With the `zoxide` plugin on, you
+- **oh-my-zsh** — optional (on by default). Answer no and the plugin question is
+  skipped, oh-my-zsh is not installed, and `.zshrc` does not load one you already
+  have. Set `OHMYZSH=0` to skip the question, or `OHMYZSH=1` to say yes.
+- **oh-my-zsh plugins** — `git` and friends (asked only if you chose oh-my-zsh).
+  With the `zoxide` plugin on, you
   are also asked whether to replace `cd` with zoxide; if so,
   `export ZOXIDE_CMD_OVERRIDE=cd` is appended to `~/.zshenv` (created if
   missing). `z` and `zi` work either way.

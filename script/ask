@@ -8,7 +8,7 @@
 #   fonts/   Nerd Fonts
 #   apps/    desktop applications (Homebrew casks)
 #   neovim/  Neovim + LazyVim (opt-in)
-#   zsh/     oh-my-zsh plugins
+#   zsh/     oh-my-zsh (optional) and its plugins
 #
 # Answers are saved to ~/.config/dotfiles/install-choices and reused silently on
 # later runs. Each topic's install.sh reads them.
@@ -26,6 +26,7 @@
 #   FONTS="fira-code dejavu-sans-mono"     Nerd Fonts ("none" for no fonts)
 #   APPS="obsidian zed"                    desktop apps, by Homebrew cask name ("none" for no apps)
 #   NEOVIM=1|0                             Neovim + LazyVim (default: ask, then no)
+#   OHMYZSH=1|0                            install oh-my-zsh (default: ask, then yes; 0 skips the plugin question)
 #   ZSH_PLUGINS="git gh ..."               oh-my-zsh plugins (syntax-highlighting last)
 #   ZOXIDE_CD=1|0                          replace cd with zoxide via ~/.zshenv (default: ask, then no)
 #   SKIP_ZSH=1                             skip the oh-my-zsh question and install
@@ -60,7 +61,10 @@ print_plan() {
   printf '  %-15s %s\n' "NEOVIM""$NEOVIM$([[ "$NEOVIM" == 1 ]] && echo '  (installs neovim, fd, lazygit; LazyVim starter -> ~/.config/nvim'"$([[ -e "${XDG_CONFIG_HOME:-$HOME/.config}/nvim" ]] && echo ', which exists and is left alone')"')')"
   if [[ -n "${SKIP_ZSH:-}" ]]; then
     printf '  %-15s %s\n' "ZSH_PLUGINS" "(skipped: SKIP_ZSH)"
+  elif [[ "$OHMYZSH" == 0 ]]; then
+    printf '  %-15s %s\n' "OHMYZSH" "0  (not installed; plugins and zoxide cd are not asked)"
   else
+    printf '  %-15s %s\n' "OHMYZSH" "1"
     printf '  %-15s %s\n' "ZSH_PLUGINS" "${ZSH_PLUGINS:-}"
     printf '  %-15s %s\n' "ZOXIDE_CD" "$ZOXIDE_CD$([[ "$ZOXIDE_CD" == 1 ]] && echo '  (adds ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv)')"
   fi
