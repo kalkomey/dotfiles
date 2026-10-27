@@ -2,8 +2,8 @@
 #
 # Docker WITHOUT Docker Desktop.
 #
-# Docker Desktop requires a paid subscription for companies of our size, so we
-# do not install or use it. Instead (all from Homebrew, all open source):
+# Docker Desktop and OrbStack require a paid subscription for companies of our size, so we
+# do not install or use them. Instead (all from Homebrew, all open source):
 #
 #   docker          the Docker CLI
 #   colima          the Linux VM that actually runs containers (the daemon)
@@ -19,10 +19,14 @@ set -euo pipefail
 
 load_brew || die "Homebrew is not installed. Run script/ask (it installs Homebrew), or bin/dot."
 
-# --- Refuse to quietly coexist with Docker Desktop ---------------------------
+# --- Refuse to quietly coexist with Docker Desktop or OrbStack ---------------
 if [[ -d /Applications/Docker.app ]] || brew list --cask docker >/dev/null 2>&1; then
   warn "Docker Desktop is installed. Using it at our size violates Docker's license terms."
   warn "Quit it and remove it:  brew uninstall --cask docker   (or drag Docker.app to the Trash)"
+fi
+if [[ -d /Applications/OrbStack.app ]] || brew list --cask orbstack >/dev/null 2>&1; then
+  warn "OrbStack is installed. Using it at our size requires a paid license."
+  warn "Quit it and remove it:  brew uninstall --cask orbstack   (or drag OrbStack.app to the Trash)"
 fi
 
 # --- Install -----------------------------------------------------------------
@@ -67,6 +71,28 @@ elif colima status >/dev/null 2>&1; then
 else
   quiet_run "Starting Colima now and at every login (brew services)..." brew services start colima \
     || warn "Could not register the Colima service. Start it yourself: colima start"
+fi
+
+# --- Leftovers from OrbStack and Docker Desktop: the active Docker context ----
+# Both add a Docker context and make it the current one, so after they are removed
+# `docker` keeps talking to a socket that is gone and fails with "no such file".
+# Colima switches to its own context when it starts, but a DOCKER_CONTEXT or
+# DOCKER_HOST set in a shell profile overrides that, and a stale one is hard to spot.
+stale_ctx=""
+case "$(docker context show 2>/dev/null || true)" in
+  orbstack)             stale_ctx="the 'orbstack' Docker context" ;;
+  desktop-linux|desktop) stale_ctx="the Docker Desktop Docker context" ;;
+esac
+case "${DOCKER_HOST:-}" in
+  */.orbstack/*)  stale_ctx="DOCKER_HOST=$DOCKER_HOST (OrbStack's socket)" ;;
+  */.docker/run/*) stale_ctx="DOCKER_HOST=$DOCKER_HOST (Docker Desktop's socket)" ;;
+esac
+if [[ -n "$stale_ctx" ]]; then
+  warn "docker is using $stale_ctx, not Colima, so it may fail with \"no such file\" for the socket."
+  if [[ -n "${DOCKER_HOST:-}" || -n "${DOCKER_CONTEXT:-}" ]]; then
+    warn "Remove DOCKER_HOST / DOCKER_CONTEXT from your shell profile (grep -rn DOCKER_ ~/.zshrc ~/.zshenv ~/.zprofile ~/.zshrc.local), then open a new terminal."
+  fi
+  warn "Switch to Colima's context:  docker context use colima"
 fi
 
 echo

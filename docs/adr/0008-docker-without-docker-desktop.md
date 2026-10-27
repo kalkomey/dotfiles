@@ -23,8 +23,9 @@ We do not install or use Docker Desktop. `docker/install.sh` installs, from Home
   work as plugins;
 - `lazydocker`, a terminal UI for containers, images and logs.
 
-The script warns if Docker Desktop is already installed and if `~/.docker/config.json` still has
-`"credsStore": "desktop"` (which breaks pulls once Docker Desktop is gone). We removed the Docker Desktop completions
+The script warns if Docker Desktop or OrbStack (also paid at our size) is already installed, and if `~/.docker/config.json` still has
+`"credsStore": "desktop"` (which breaks pulls once Docker Desktop is gone). It also warns when the active Docker context or `DOCKER_HOST` still points at
+OrbStack or Docker Desktop, because docker then fails with "no such file" for a socket that no longer exists. We removed the Docker Desktop completions
 block from `zshrc.symlink`.
 
 ## Alternatives considered
