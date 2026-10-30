@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
+echo "Installing/updating vim plugins in ~/.vimbundles..."
 mkdir -p ~/.vimbundles
 cd ~/.vimbundles
 
 get_bundle() {
   (
   if [ -d "$2" ]; then
-    echo "Updating $1's $2"
     cd "$2"
-    git pull --rebase
+    git pull --quiet --rebase
   else
-    git clone "https://github.com/$1/$2.git"
+    git clone --quiet "https://github.com/$1/$2.git"
   fi
   )
 }
+
+# ag.vim is deprecated; ack.vim (below) now drives ripgrep
+rm -rf ~/.vimbundles/ag.vim
 
 get_bundle duff vim-bufonly
 get_bundle elzr vim-json
@@ -27,7 +30,6 @@ get_bundle junegunn fzf
 get_bundle kchmck vim-coffee-script
 get_bundle mileszs ack.vim
 get_bundle pangloss vim-javascript
-get_bundle rking ag.vim
 get_bundle rust-lang rust.vim
 get_bundle therubymug vim-pyte
 get_bundle tomasr molokai

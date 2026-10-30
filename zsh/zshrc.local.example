@@ -1,0 +1,15 @@
+#
+# ENV VARIABLES
+#
+export BUNDLE_GEM__FURY__IO="<put your key here>"
+
+#
+# ALIASES
+#
+#alias brewup="brew update && brew upgrade && brew cleanup"
+#alias ll="ls -alhF --color=always | less -R -F -X"
+#alias reload="source ~/.zshrc"
+
+#
+# FUNCTIONS
+#

@@ -1,0 +1,6 @@
+{
+  "name": "kalkomey-statusbar",
+  "version": "0.1.0",
+  "description": "Model, context usage, session cost and duration above the prompt in the Claude desktop app",
+  "author": { "name": "Kalkomey" }
+}
