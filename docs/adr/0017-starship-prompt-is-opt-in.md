@@ -11,7 +11,7 @@ possible in mise (ADR 0002).
 
 ## Decision
 
-`script/ask` asks "Use the starship prompt?" (default no, `STARSHIP=1|0` to skip the question). On yes, `derive_answers`
+`script/ask` asks one question for oh-my-zsh and starship, which both style the shell: oh-my-zsh, starship, both or neither (default oh-my-zsh, as before; `OHMYZSH` and `STARSHIP` env vars skip it, and an env var for only one of them leaves the other as its own yes/no question). On starship, `derive_answers`
 adds `starship` to the mise tools, and `starship/install.sh` writes `~/.config/dotfiles/starship.zsh` (a guarded
 `eval "$(starship init zsh)"`) and copies `starship/starship.toml.example` to `~/.config/starship.toml` only if that file
 does not exist. `~/.zshrc` sources the generated file after oh-my-zsh, so starship's prompt replaces the theme. Answering
@@ -20,6 +20,7 @@ no later removes the generated file and leaves `starship.toml` alone.
 ## Alternatives considered
 
 - **Homebrew's starship**: works, but splits tool management between two systems.
+- **Two separate yes/no questions**: they overlap (both set the prompt), so people were asked to decide twice and could not tell they were alternatives. One menu says so, and "both" is explicit.
 - **On for everyone**: a prompt is personal; the default stays as it was.
 - **Edit `~/.zshrc` directly**: it may be someone's own file (or a stow symlink). A generated file in
   `~/.config/dotfiles` that the repo's `.zshrc` sources follows how the oh-my-zsh plugin list already works.

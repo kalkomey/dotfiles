@@ -9,7 +9,7 @@
 #   apps/    desktop applications (Homebrew casks)
 #   neovim/  Neovim + LazyVim (opt-in)
 #   starship/ the starship prompt (opt-in)
-#   zsh/     oh-my-zsh (optional) and its plugins
+#   zsh/     shell setup (oh-my-zsh, starship, both or neither), then oh-my-zsh plugins
 #
 # Answers are saved to ~/.config/dotfiles/install-choices and reused silently on
 # later runs. Each topic's install.sh reads them.
@@ -94,6 +94,7 @@ ask_mise
 ask_fonts
 ask_apps
 ask_neovim
+ask_shell
 ask_zsh
 ask_starship
 
