@@ -1,0 +1,58 @@
+# Starter starship config. install copies this to ~/.config/starship.toml if you have
+# none; after that it is yours to edit (https://starship.rs/config/). Updates to this
+# example never touch your copy.
+#
+# It uses plain-text symbols so it looks right in any terminal font. With a Nerd Font
+# set as your terminal font, you can get icons instead:
+#   starship preset nerd-font-symbols -o ~/.config/starship.toml
+
+# One line: where you are, git state, language versions, then the prompt character.
+format = """
+$directory\
+$git_branch\
+$git_status\
+$ruby\
+$nodejs\
+$python\
+$aws\
+$cmd_duration\
+$line_break\
+$character"""
+
+# Don't print a blank line between prompts.
+add_newline = false
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+
+[git_branch]
+symbol = ""
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+
+[ruby]
+symbol = "rb "
+format = "[$symbol($version)]($style) "
+
+[nodejs]
+symbol = "node "
+format = "[$symbol($version)]($style) "
+
+[python]
+symbol = "py "
+format = "[$symbol($version)]($style) "
+
+[aws]
+symbol = "aws "
+format = "[$symbol($profile)]($style) "
+
+[cmd_duration]
+min_time = 3000
+format = "took [$duration]($style) "
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"

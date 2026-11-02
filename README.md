@@ -137,6 +137,13 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `apps/`, `neovi
   `lazygit`, and the LazyVim starter into `~/.config/nvim` (skipped if that
   directory already exists). LazyVim wants a Nerd Font, so pick one above. Run
   with `nvim`; your vim setup is untouched.
+- **starship prompt** — optional (off by default). Installs
+  [starship](https://starship.rs) with mise and has `~/.zshrc` load it after
+  oh-my-zsh, so it replaces the oh-my-zsh theme. If you have no
+  `~/.config/starship.toml`, it copies [`starship/starship.toml.example`](starship/starship.toml.example)
+  there (plain-text symbols, so it works in any font); an existing file is never
+  touched, and the copy is yours to edit. Answer no on a later run
+  (`RECONFIGURE=1`) to switch back; your `starship.toml` stays.
 
 The zsh installer also appends one marked block to `~/.zprofile` (Homebrew's
 `shellenv`, then mise shims) so login shells, scripts and IDE tasks use the same

@@ -25,7 +25,7 @@ require_macos() {
 # Answers live outside the repo so personal choices are never committed.
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
 CHOICES_FILE="$CONFIG_DIR/install-choices"
-ANSWER_VARS="MISE_LANGUAGES MISE_TOOLS OHMYZSH ZSH_PLUGINS ZOXIDE_CD NEOVIM FONTS APPS"
+ANSWER_VARS="MISE_LANGUAGES MISE_TOOLS OHMYZSH ZSH_PLUGINS ZOXIDE_CD NEOVIM STARSHIP FONTS APPS"
 SAVED_VARS=""
 
 # load_saved_answers [install]
@@ -56,6 +56,7 @@ save_answers() {
     echo "ZSH_PLUGINS=${ZSH_PLUGINS:-}"
     echo "ZOXIDE_CD=${ZOXIDE_CD:-0}"
     echo "NEOVIM=$NEOVIM"
+    echo "STARSHIP=${STARSHIP:-0}"
     echo "FONTS=${FONTS:-none}"
     echo "APPS=${APPS:-none}"
   } > "$CHOICES_FILE"
@@ -66,6 +67,7 @@ normalize_answers() {
   ZSH_PLUGINS="${ZSH_PLUGINS:-}"
   ZOXIDE_CD="${ZOXIDE_CD:-0}"
   NEOVIM="${NEOVIM:-0}"
+  STARSHIP="${STARSHIP:-0}"
   FONTS="${FONTS:-none}"
   [[ "$FONTS" != none ]] || FONTS=""
   APPS="${APPS:-none}"
@@ -87,6 +89,11 @@ derive_answers() {
   if [[ " $MISE_TOOLS " == *" yamllint"* && " $MISE_TOOLS " != *" uv"* ]]; then
     MISE_TOOLS="uv $MISE_TOOLS"
     DERIVED+=("tool uv (required by yamllint)")
+  fi
+  # The starship prompt comes from mise, like the other tools (starship/install.sh does the rest).
+  if [[ "${STARSHIP:-0}" == 1 && " $MISE_TOOLS " != *" starship"* ]]; then
+    MISE_TOOLS="starship $MISE_TOOLS"
+    DERIVED+=("tool starship (the starship prompt you chose)")
   fi
   if [[ " $MISE_LANGUAGES " == *" erlang"* ]]; then
     export KERL_CONFIGURE_OPTIONS="${KERL_CONFIGURE_OPTIONS:---without-javac --without-wx --without-odbc}"

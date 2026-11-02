@@ -92,6 +92,10 @@ fi
 # Re-source ours so the dotfiles versions (e.g. signed commits) win.
 for f in $DOTHOME/**/aliases.zsh(N); do source $f; done
 
+# starship prompt (optional). starship/install.sh writes this file when you choose it.
+# It goes after oh-my-zsh so the starship prompt replaces the oh-my-zsh theme.
+[ -r "$HOME/.config/dotfiles/starship.zsh" ] && source "$HOME/.config/dotfiles/starship.zsh"
+
 # import local zsh customizations, if present
 zrcl="$HOME/.zshrc.local"
 

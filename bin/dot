@@ -41,6 +41,8 @@ case $DISTRO in
     bash $DOTHOME/neovim/install.sh 2>&1
     echo "oh-my-zsh update"
     bash $DOTHOME/zsh/install.sh 2>&1
+    echo "starship update"
+    bash $DOTHOME/starship/install.sh 2>&1
     # Claude Code status line (only if Claude Code is in use; never overwrites)
     bash $DOTHOME/claude/install.sh 2>&1
     # Symlink databases

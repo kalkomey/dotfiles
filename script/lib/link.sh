@@ -261,6 +261,7 @@ link_summary() {
     plugins=(git)
     [ -r ~/.config/dotfiles/zsh-plugins.zsh ] && source ~/.config/dotfiles/zsh-plugins.zsh
     source "$ZSH/oh-my-zsh.sh"
+    [ -r ~/.config/dotfiles/starship.zsh ] && source ~/.config/dotfiles/starship.zsh   # only if you chose starship
 
 EOF
     done
