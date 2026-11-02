@@ -46,7 +46,7 @@ ask_shell() {
   echo "  3) both       oh-my-zsh plugins, with the starship prompt instead of its theme"
   echo "  4) neither"
   while :; do
-    # End of input (Ctrl-D) would loop forever; fall back to the no-terminal default (neither).
+    # End of input (Ctrl-D) would loop forever; treat it as "neither".
     read -r -p "Choose 1-4: " ans </dev/tty || { OHMYZSH=0; STARSHIP=0; break; }
     case "$ans" in
       1) OHMYZSH=1; STARSHIP=0; break ;;
