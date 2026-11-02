@@ -14,7 +14,7 @@ app added later, on every machine.
 
 We added an **Applications** question to `script/ask`, with its own topic directory, `apps/`, like `fonts/`.
 
-- The list is Homebrew cask names: cmux, ghostty, hex (`anomalyco/tap/hex`, a third-party tap), kitty, obsidian, rectangle, sequel-ace, sublime-text, tldraw and zed. Only
+- The list is Homebrew cask names: cmux, ghostty, github (GitHub Desktop), hex (`anomalyco/tap/hex`, a third-party tap), kitty, obsidian, rectangle, sequel-ace, sublime-text, tldraw and zed. Only
   None is on by default, because IT's machine image already installs the security and standard apps (Firefox, for
   example), so this list only holds optional extras.
 - Engineers can type any other cask name. It is checked with `brew info --cask` before anything installs
