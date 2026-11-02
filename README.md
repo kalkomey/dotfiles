@@ -139,7 +139,8 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `apps/`, `neovi
   terminal font to the family name, e.g. "FiraCode Nerd Font", and turn on
   ligatures if your terminal has a setting (iTerm2 does; Terminal.app has no
   ligature support).
-- **Applications** — Homebrew casks, listed by cask name: cmux, ghostty, kitty,
+- **Applications** — Homebrew casks, listed by cask name: cmux, ghostty, hex
+  (voice dictation, from the `anomalyco/tap` tap; Apple Silicon and macOS 15+), kitty,
   obsidian, rectangle, sequel-ace, sublime-text, tldraw and zed. None is on by default,
   because IT's machine image already installs the standard apps. Type any
   other cask name (for example `raycast`) to add it; it is

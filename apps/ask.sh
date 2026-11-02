@@ -2,11 +2,13 @@
 # apps topic: which desktop applications to install from Homebrew casks.
 # Sourced by script/ask. Same parallel-array shape as mise/ask.sh; the names are
 # Homebrew cask names, so what you see here is what `brew install --cask` takes.
+# A cask from a third-party tap is written as user/tap/name (brew taps it on install).
 
-APP_NAMES=(cmux ghostty kitty obsidian rectangle sequel-ace sublime-text tldraw zed)
+APP_NAMES=(cmux ghostty anomalyco/tap/hex kitty obsidian rectangle sequel-ace sublime-text tldraw zed)
 APP_DESCS=(
   "Ghostty-based terminal with vertical tabs, built for AI coding agents"
   "Terminal emulator with a native UI and GPU acceleration"
+  "Local voice dictation (from the anomalyco/tap tap; Apple Silicon, macOS 15+)"
   "GPU-based terminal emulator"
   "Notes on top of a local folder of Markdown files"
   "Move and resize windows with keyboard shortcuts or snap areas"
@@ -16,7 +18,7 @@ APP_DESCS=(
   "Fast, multiplayer code editor"
 )
 APP_VERS=()
-APP_ON=(0 0 0 0 0 0 0 0 0)   # nothing on by default: IT's machine image already installs the standard apps
+APP_ON=(0 0 0 0 0 0 0 0 0 0)   # nothing on by default: IT's machine image already installs the standard apps
 
 ask_apps() {
   # "none" is how a saved "no apps" answer is stored (empty means unanswered).

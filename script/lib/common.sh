@@ -193,7 +193,7 @@ brew_install_missing() {
   if [[ "${1:-}" == --cask ]]; then kind=cask; flag="--cask"; shift; fi
   installed="$(brew list "--$kind" -1 2>/dev/null || true)"
   for p in "$@"; do
-    grep -qxF -- "$p" <<<"$installed" || missing+=("$p")
+    grep -qxF -- "${p##*/}" <<<"$installed" || missing+=("$p")
   done
   if (( ${#missing[@]} == 0 )); then
     say "Already installed: $*"
