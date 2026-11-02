@@ -26,6 +26,7 @@ one file per decision, numbered in the order they were made.
 | [0015](0015-claude-desktop-status-bar-as-a-mod.md) | Claude desktop status bar as a mod | Accepted |
 | [0016](0016-desktop-apps-chosen-in-script-ask.md) | Desktop apps are chosen in `script/ask`, not listed in the Brewfile | Accepted |
 | [0017](0017-starship-prompt-is-opt-in.md) | The starship prompt is an opt-in question, installed with mise | Accepted |
+| [0018](0018-default-gems-installed-with-each-ruby.md) | Public default gems with every Ruby; private gems from a separate installer | Accepted |
 
 ## Adding one
 

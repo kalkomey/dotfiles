@@ -33,6 +33,9 @@ case $DISTRO in
     # Languages (ruby, node, ...) and CLI tools via mise
     echo "mise update"
     bash $DOTHOME/mise/install.sh 2>&1
+    # Private Ruby gems (aios-claude, from Gemfury; needs BUNDLE_GEM__FURY__IO)
+    echo "Ruby gems update"
+    bash $DOTHOME/ruby/install.sh 2>&1
     echo "Fonts update"
     bash $DOTHOME/fonts/install.sh 2>&1
     echo "Applications update"

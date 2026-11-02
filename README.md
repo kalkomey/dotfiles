@@ -99,6 +99,19 @@ skips it with a note when that is missing. Manage it with `/plugin`, or
 place, since the marketplace points at it. Run both steps on their own with
 `bash ~/.dotfiles/claude/install.sh`.
 
+### Ruby gems
+
+Every Ruby that mise installs gets `bundler` and `rails` automatically, from
+[`ruby/default-gems.symlink`](ruby/default-gems.symlink) (linked to `~/.default-gems`). A Ruby you
+already have does not get them until you run `gem install bundler rails`.
+
+`aios-claude` (which installs `aios`) comes from Kalkomey's private Gemfury server, so
+`ruby/install.sh` installs it with the key in `BUNDLE_GEM__FURY__IO`. Put that in
+`~/.zshrc.local`; it is never committed. The value can be the key itself or a 1Password
+reference (`op://Developers/AIOS Operator Keys/Gem Fury Read-only`); the installer reads a reference with
+the 1Password CLI, so 1Password must be unlocked. Without it, `dot` prints a note and skips the gem. Add
+the token, open a new terminal, and run `bash ~/.dotfiles/ruby/install.sh`.
+
 ### languages, tools, and zsh plugins
 
 Languages and CLI tools are managed by [mise](https://mise.jdx.dev). `dot`
