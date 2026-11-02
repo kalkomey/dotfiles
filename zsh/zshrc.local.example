@@ -1,21 +1,14 @@
 #
 # ENV VARIABLES
 #
-# Gemfury key for Kalkomey's private gems (aios-claude, and the gems in our Gemfiles).
+# Gemfury key for Kalkomey's private aios gems (aios-claude and aios).
 # This is a 1Password reference, not the key. The installer (ruby/install.sh) reads it with the
 # 1Password CLI (`op`), which needs 1Password unlocked with "Integrate with 1Password CLI" on.
-# If you prefer, put the key itself here instead and delete the bundle() function below.
+# You can put the key itself here instead.
+# Bundler also reads this variable for gem.fury.io. Our app Gemfiles carry their own token, so
+# they do not use it. If a project's Gemfile relies on it, that project needs the real key:
+# run it as `op run -- bundle install`.
 export BUNDLE_GEM__FURY__IO="op://Developers/AIOS Operator Keys/Gem Fury Read-only"
-
-# Bundler sends BUNDLE_GEM__FURY__IO as the Gemfury password, so it needs the real key, not
-# the reference. `op run` swaps the key in for this one command only.
-bundle() {
-  if [[ "$BUNDLE_GEM__FURY__IO" == op://* ]] && command -v op >/dev/null 2>&1; then
-    op run -- bundle "$@"
-  else
-    command bundle "$@"
-  fi
-}
 
 #
 # ALIASES
