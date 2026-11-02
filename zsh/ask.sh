@@ -31,11 +31,10 @@ PLUGIN_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
 # both (starship is sourced after oh-my-zsh, so it wins the prompt), some neither. Skipped
 # when either answer is already known (env var or saved answer); ask_zsh and ask_starship
 # then ask about whichever is still unanswered on its own. With no terminal to ask on,
-# the default is oh-my-zsh only, as before starship existed. With one, there is
-# no default: the person has to choose.
+# the default is neither. With one, nothing is preselected: the person has to choose.
 ask_shell() {
   [[ -z "${SKIP_ZSH:-}" && -z "${OHMYZSH:-}" && -z "${STARSHIP:-}" ]] || return 0
-  OHMYZSH=1
+  OHMYZSH=0
   STARSHIP=0
   can_prompt || return 0
   local ans
@@ -46,8 +45,8 @@ ask_shell() {
   echo "  3) both       oh-my-zsh plugins, with the starship prompt instead of its theme"
   echo "  4) neither"
   while :; do
-    # End of input (Ctrl-D) would loop forever; fall back to the no-terminal default.
-    read -r -p "Choose 1-4: " ans </dev/tty || { OHMYZSH=1; STARSHIP=0; break; }
+    # End of input (Ctrl-D) would loop forever; fall back to the no-terminal default (neither).
+    read -r -p "Choose 1-4: " ans </dev/tty || { OHMYZSH=0; STARSHIP=0; break; }
     case "$ans" in
       1) OHMYZSH=1; STARSHIP=0; break ;;
       2) OHMYZSH=0; STARSHIP=1; break ;;

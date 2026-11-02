@@ -11,7 +11,7 @@ possible in mise (ADR 0002).
 
 ## Decision
 
-`script/ask` asks one question for oh-my-zsh and starship, which both style the shell: oh-my-zsh, starship, both or neither (no default when asked on a terminal; with none, oh-my-zsh as before; `OHMYZSH` and `STARSHIP` env vars skip it, and an env var for only one of them leaves the other as its own yes/no question). On starship, `derive_answers`
+`script/ask` asks one question for oh-my-zsh and starship, which both style the shell: oh-my-zsh, starship, both or neither (no default when asked on a terminal; with none, or on end of input, neither; `OHMYZSH` and `STARSHIP` env vars skip it, and an env var for only one of them leaves the other as its own yes/no question). On starship, `derive_answers`
 adds `starship` to the mise tools, and `starship/install.sh` writes `~/.config/dotfiles/starship.zsh` (a guarded
 `eval "$(starship init zsh)"`) and copies `starship/starship.toml.example` to `~/.config/starship.toml` only if that file
 does not exist. `~/.zshrc` sources the generated file after oh-my-zsh, so starship's prompt replaces the theme. Answering
