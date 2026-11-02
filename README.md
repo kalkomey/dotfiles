@@ -138,7 +138,7 @@ defaults), then runs one installer per topic (`mise/`, `fonts/`, `apps/`, `neovi
   directory already exists). LazyVim wants a Nerd Font, so pick one above. Run
   with `nvim`; your vim setup is untouched.
 - **starship prompt** — optional (off by default). One question covers it
-  and oh-my-zsh: oh-my-zsh, starship, both or neither. Installs
+  and oh-my-zsh: oh-my-zsh, starship, both or neither (no default). Installs
   [starship](https://starship.rs) with mise and has `~/.zshrc` load it after
   oh-my-zsh, so it replaces the oh-my-zsh theme. If you have no
   `~/.config/starship.toml`, it copies [`starship/starship.toml.example`](starship/starship.toml.example)

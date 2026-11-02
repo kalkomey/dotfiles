@@ -31,7 +31,8 @@ PLUGIN_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
 # both (starship is sourced after oh-my-zsh, so it wins the prompt), some neither. Skipped
 # when either answer is already known (env var or saved answer); ask_zsh and ask_starship
 # then ask about whichever is still unanswered on its own. With no terminal to ask on,
-# the default is oh-my-zsh only, as before starship existed.
+# the default is oh-my-zsh only, as before starship existed. With one, there is
+# no default: the person has to choose.
 ask_shell() {
   [[ -z "${SKIP_ZSH:-}" && -z "${OHMYZSH:-}" && -z "${STARSHIP:-}" ]] || return 0
   OHMYZSH=1
@@ -41,17 +42,18 @@ ask_shell() {
   echo
   echo "Shell setup:"
   echo "  1) oh-my-zsh  a zsh framework with plugins (git, aws, docker...) and a theme"
-  echo "  2) starship   a fast, customizable prompt (https://starship.rs); installed with mise"
+  echo "  2) starship   a fast, customizable prompt (https://starship.rs)"
   echo "  3) both       oh-my-zsh plugins, with the starship prompt instead of its theme"
   echo "  4) neither"
   while :; do
-    read -r -p "Choose 1-4 [1]: " ans </dev/tty || ans=""
-    case "${ans:-1}" in
+    # End of input (Ctrl-D) would loop forever; fall back to the no-terminal default.
+    read -r -p "Choose 1-4: " ans </dev/tty || { OHMYZSH=1; STARSHIP=0; break; }
+    case "$ans" in
       1) OHMYZSH=1; STARSHIP=0; break ;;
       2) OHMYZSH=0; STARSHIP=1; break ;;
       3) OHMYZSH=1; STARSHIP=1; break ;;
       4) OHMYZSH=0; STARSHIP=0; break ;;
-      *) echo "Please enter 1, 2, 3 or 4." ;;
+      *) echo "Please enter 1, 2, 3 or 4 (there is no default)." ;;
     esac
   done
 }

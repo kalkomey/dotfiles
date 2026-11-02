@@ -8,7 +8,7 @@ ask_starship() {
     if can_prompt; then
       echo
       echo "starship is a fast, customizable shell prompt (https://starship.rs). It replaces the oh-my-zsh theme;"
-      echo "it is installed with mise, plus a starter ~/.config/starship.toml if you have none."
+      echo "A starter ~/.config/starship.toml is added if you have none."
       read -r -p "Use the starship prompt? [y/N] " ans </dev/tty || ans=""
       [[ "$ans" =~ ^[Yy] ]] && STARSHIP=1
     fi
