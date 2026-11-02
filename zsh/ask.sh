@@ -31,10 +31,11 @@ PLUGIN_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
 # both (starship is sourced after oh-my-zsh, so it wins the prompt), some neither. Skipped
 # when either answer is already known (env var or saved answer); ask_zsh and ask_starship
 # then ask about whichever is still unanswered on its own. With no terminal to ask on,
-# the default is neither. With one, nothing is preselected: the person has to choose.
+# the default is oh-my-zsh only, as before starship existed. With one, nothing is
+# preselected: the person has to choose (Ctrl-D, end of input, means neither).
 ask_shell() {
   [[ -z "${SKIP_ZSH:-}" && -z "${OHMYZSH:-}" && -z "${STARSHIP:-}" ]] || return 0
-  OHMYZSH=0
+  OHMYZSH=1
   STARSHIP=0
   can_prompt || return 0
   local ans
