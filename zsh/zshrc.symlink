@@ -88,6 +88,15 @@ if [ "${DOTFILES_OHMYZSH:-1}" != 0 ] && [ -r "$ZSH/oh-my-zsh.sh" ]; then
   source "$ZSH/oh-my-zsh.sh"
 fi
 
+# fzf key bindings and completion (Ctrl-R history, Ctrl-T files, Alt-C cd). fzf comes from
+# mise, so there is no ~/.fzf.zsh. The oh-my-zsh fzf plugin does this when oh-my-zsh is
+# loaded and the plugin is chosen; otherwise (starship only, neither, or the plugin
+# left off) do it here so Ctrl-R is always the fzf picker and not zsh's bck-i-search.
+if (( $+commands[fzf] )) && [ ! -f ~/.fzf.zsh ] \
+   && { [ "${DOTFILES_OHMYZSH:-1}" = 0 ] || [ -z "${plugins[(r)fzf]}" ]; }; then
+  source <(fzf --zsh 2>/dev/null)
+fi
+
 # oh-my-zsh plugins define aliases that collide with ours (gc, gd, gca, ...).
 # Re-source ours so the dotfiles versions (e.g. signed commits) win.
 for f in $DOTHOME/**/aliases.zsh(N); do source $f; done
