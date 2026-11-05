@@ -1,9 +1,29 @@
 # shellcheck shell=bash
 # zsh topic: how the shell is set up. Sourced by script/ask.
 #
-# oh-my-zsh is optional and used only for its theme; it loads no plugins. The tool
-# integrations (fzf, zoxide, direnv, completions) live in zsh/integrations.sh and work
-# whichever of oh-my-zsh and starship you pick, or neither.
+# oh-my-zsh is optional. If you install it you can pick plugins, or none to use it only
+# for its theme. The tool integrations (fzf, zoxide, direnv, completions) and the typing
+# helpers are not oh-my-zsh plugins: they live in zsh/integrations.sh and zsh/typing.sh and
+# work whichever of oh-my-zsh and starship you pick, or neither.
+
+PLUGIN_NAMES=(git gh aws docker docker-compose terraform ruby rails bundler npm yarn tmux macos)
+PLUGIN_DESCS=(
+  "git aliases (gst, gco, gp...) and branch helpers"
+  "GitHub CLI completions"
+  "AWS CLI completions and profile helpers"
+  "Docker completions"
+  "docker compose aliases"
+  "Terraform completions and aliases"
+  "Ruby aliases"
+  "Rails aliases (rails s, rails c...)"
+  "Bundler aliases (be, bi...)"
+  "npm completions and aliases"
+  "yarn completions and aliases"
+  "tmux aliases"
+  "macOS helpers (ofd, pfd, showfiles...)"
+)
+PLUGIN_VERS=()
+PLUGIN_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1)
 
 # One question for the two things that style the shell: oh-my-zsh (a framework with
 # plugins and a theme) and starship (a prompt). Many people want one or the other, some
@@ -13,7 +33,7 @@
 # the default is oh-my-zsh only, as before starship existed. With one, nothing is
 # preselected: the person has to choose (Ctrl-D, end of input, means neither).
 ask_shell() {
-  [[ -z "${SKIP_ZSH:-}" && -z "${OHMYZSH:-}" && -z "${STARSHIP:-}" ]] || return 0
+  [[ -z "${SKIP_ZSH:-}" && -z "${OHMYZSH:-}" && -z "${STARSHIP:-}" && -z "${ZSH_PLUGINS:-}" ]] || return 0
   OHMYZSH=1
   STARSHIP=0
   can_prompt || return 0
@@ -38,17 +58,32 @@ ask_shell() {
 }
 
 # oh-my-zsh when it was not settled by ask_shell above (one of OHMYZSH and STARSHIP was
-# already known). Only a theme, so there is no point in it next to starship.
+# already known), then its plugins. Choosing no plugins uses oh-my-zsh for its theme only;
+# more can be added later by editing the plugins list (re-run with RECONFIGURE=1).
 ask_zsh() {
   [[ -z "${SKIP_ZSH:-}" ]] || return 0
   if [[ -z "${OHMYZSH:-}" ]]; then
-    OHMYZSH=0
-    if [[ "${STARSHIP:-0}" != 1 ]] && can_prompt; then
-      echo
-      read -r -p "Install oh-my-zsh (used only for its prompt theme)? [y/N] " ans </dev/tty || ans=""
-      [[ ! "$ans" =~ ^[Yy] ]] || OHMYZSH=1
+    if [[ -n "${ZSH_PLUGINS:-}" && "${ZSH_PLUGINS:-}" != none ]]; then
+      OHMYZSH=1   # a plugin list from an earlier version or an override means yes
+    else
+      OHMYZSH=0
+      if [[ "${STARSHIP:-0}" != 1 ]] && can_prompt; then
+        echo
+        read -r -p "Install oh-my-zsh (a zsh framework with a theme and optional plugins)? [y/N] " ans </dev/tty || ans=""
+        [[ ! "$ans" =~ ^[Yy] ]] || OHMYZSH=1
+      fi
     fi
   fi
+  # No oh-my-zsh, so no plugins to choose.
+  if [[ "$OHMYZSH" == 0 ]]; then
+    ZSH_PLUGINS=none
+    return 0
+  fi
+  # "none" is how a saved "no plugins" answer is stored (empty means unanswered).
+  if [[ "${ZSH_PLUGINS:-}" != none ]]; then
+    resolve_choice ZSH_PLUGINS PLUGIN "oh-my-zsh plugins (optional: choose none to use oh-my-zsh for its theme only):" 0 0
+  fi
+  ZSH_PLUGINS="${ZSH_PLUGINS:-none}"
   return 0
 }
 

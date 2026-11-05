@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Shell setup beyond the prompt: oh-my-zsh (only if you chose it, and only for its theme),
+# Shell setup beyond the prompt: oh-my-zsh and its plugins (only if you chose it),
 # the zoxide `cd` setting, zsh-autosuggestions and zsh-syntax-highlighting (if chosen), and
 # shell completions. Reads the answers saved by script/ask. The ~/.zprofile block (Homebrew
 # + mise shims) is written either way, and tool integrations (fzf, zoxide, direnv) are set
@@ -15,9 +15,9 @@ if [[ -n "${SKIP_ZSH:-}" ]]; then
   exit 0
 fi
 
-# oh-my-zsh is only used for its theme: no plugins, no extra clones. Everything else
-# (fzf, zoxide, direnv, completions) is set up below or in zsh/integrations.sh, whether or
-# not oh-my-zsh is installed.
+# oh-my-zsh, with the plugins you chose (none means its theme only). Everything else (fzf,
+# zoxide, direnv, completions) is set up below or in zsh/integrations.sh, whether or not
+# oh-my-zsh is installed, so there are no plugins for those.
 install_ohmyzsh() {
   export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
   [[ ! -d "$ZSH" ]] || return 0
@@ -120,6 +120,18 @@ else
   printf '%s\n' "$ZPROFILE_BLOCK" >> "$HOME/.zprofile"
 fi
 
+# The plugin list, minus names that are not oh-my-zsh plugins here any more: fzf, zoxide
+# and direnv are set up by zsh/integrations.sh, and the two typing helpers by zsh/typing.sh,
+# so listing them again (an older saved answer might) would load them twice.
+clean_plugins() {
+  local p out=""
+  for p in $ZSH_PLUGINS; do
+    case "$p" in fzf|zoxide|direnv|zsh-autosuggestions|zsh-syntax-highlighting) continue ;; esac
+    out="$out $p"
+  done
+  printf '%s' "${out# }"
+}
+
 mkdir -p "$CONFIG_DIR"
 say "Writing $CONFIG_DIR/ohmyzsh.zsh"
 {
@@ -129,6 +141,7 @@ say "Writing $CONFIG_DIR/ohmyzsh.zsh"
     echo "DOTFILES_OHMYZSH=0"
   else
     echo "DOTFILES_OHMYZSH=1"
+    echo "plugins=($(clean_plugins))"
   fi
 } > "$CONFIG_DIR/ohmyzsh.zsh"
 # Older versions wrote the plugin list here; it is no longer read.

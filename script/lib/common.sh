@@ -25,7 +25,7 @@ require_macos() {
 # Answers live outside the repo so personal choices are never committed.
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
 CHOICES_FILE="$CONFIG_DIR/install-choices"
-ANSWER_VARS="MISE_LANGUAGES MISE_TOOLS OHMYZSH ZOXIDE_CD ZSH_TYPING NEOVIM STARSHIP FONTS APPS"
+ANSWER_VARS="MISE_LANGUAGES MISE_TOOLS OHMYZSH ZSH_PLUGINS ZOXIDE_CD ZSH_TYPING NEOVIM STARSHIP FONTS APPS"
 SAVED_VARS=""
 
 # load_saved_answers [install]
@@ -53,6 +53,7 @@ save_answers() {
     echo "MISE_LANGUAGES=$MISE_LANGUAGES"
     echo "MISE_TOOLS=$MISE_TOOLS"
     echo "OHMYZSH=${OHMYZSH:-1}"
+    echo "ZSH_PLUGINS=${ZSH_PLUGINS:-none}"
     echo "ZOXIDE_CD=${ZOXIDE_CD:-0}"
     echo "ZSH_TYPING=${ZSH_TYPING:-0}"
     echo "NEOVIM=$NEOVIM"
@@ -64,6 +65,8 @@ save_answers() {
 
 normalize_answers() {
   OHMYZSH="${OHMYZSH:-1}"
+  ZSH_PLUGINS="${ZSH_PLUGINS:-none}"
+  [[ "$ZSH_PLUGINS" != none ]] || ZSH_PLUGINS=""
   ZOXIDE_CD="${ZOXIDE_CD:-0}"
   ZSH_TYPING="${ZSH_TYPING:-0}"
   NEOVIM="${NEOVIM:-0}"
