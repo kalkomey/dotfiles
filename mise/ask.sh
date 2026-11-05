@@ -19,7 +19,7 @@ LANG_DESCS=(
 LANG_VERS=(4.0.6 lts latest latest latest lts latest)
 LANG_ON=(1 1 0 0 0 0 0)
 
-TOOL_NAMES=(1password-cli aws-cli aws-vault aqua:aws/session-manager-plugin consul direnv fzf gh git-lfs gron jq nomad ripgrep terraform trivy aqua:helmfile/vals vault yamllint yarn zoxide)
+TOOL_NAMES=(1password-cli aws-cli aws-vault aqua:aws/session-manager-plugin consul direnv fzf gh git-lfs gron jq nomad ripgrep terraform trivy vals vault yamllint yarn zoxide)
 TOOL_DESCS=(
   "1Password CLI (op)"
   "AWS CLI"
