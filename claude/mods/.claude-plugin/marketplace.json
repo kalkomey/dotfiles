@@ -1,0 +1,11 @@
+{
+  "name": "kalkomey-dotfiles",
+  "owner": { "name": "Kalkomey" },
+  "plugins": [
+    {
+      "name": "kalkomey-statusbar",
+      "source": "./kalkomey-statusbar",
+      "description": "Model, context usage, session cost and duration above the prompt in the Claude desktop app"
+    }
+  ]
+}

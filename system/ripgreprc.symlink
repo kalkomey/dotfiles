@@ -1,0 +1,11 @@
+# ripgrep config (replaces ~/.ackrc). Loaded via RIPGREP_CONFIG_PATH in system/env.zsh.
+# haml, sass/scss, etc. are built-in types; these are the ones rg doesn't know.
+--type-add=coffee:*.coffee
+--type-add=cucumber:*.feature
+
+# Do not search these directories for quicker lookup
+--glob=!log
+--glob=!tags
+--glob=!tmp
+
+--smart-case
