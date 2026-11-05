@@ -9,7 +9,7 @@
 #   apps/    desktop applications (Homebrew casks)
 #   neovim/  Neovim + LazyVim (opt-in)
 #   starship/ the starship prompt (opt-in)
-#   zsh/     shell setup (oh-my-zsh, starship, both or neither), then oh-my-zsh plugins
+#   zsh/     shell setup (oh-my-zsh theme, starship, both or neither), zoxide cd, typing helpers
 #
 # Answers are saved to ~/.config/dotfiles/install-choices and reused silently on
 # later runs. Each topic's install.sh reads them.
@@ -28,8 +28,8 @@
 #   APPS="obsidian zed"                    desktop apps, by Homebrew cask name ("none" for no apps)
 #   NEOVIM=1|0                             Neovim + LazyVim (default: ask, then no)
 #   STARSHIP=1|0                           starship prompt (default: ask, then no)
-#   OHMYZSH=1|0                            install oh-my-zsh (default: ask, then yes; 0 skips the plugin question)
-#   ZSH_PLUGINS="git gh ..."               oh-my-zsh plugins (syntax-highlighting last)
+#   OHMYZSH=1|0                            install oh-my-zsh, used only for its theme (see ask_shell in zsh/ask.sh)
+#   ZSH_TYPING=1|0                         zsh-autosuggestions and zsh-syntax-highlighting (default: ask, then no)
 #   ZOXIDE_CD=1|0                          replace cd with zoxide via ~/.zshenv (default: ask, then no)
 #   SKIP_ZSH=1                             skip the oh-my-zsh question and install
 #   SKIP_BREW_DEPS=1                       (mise/install.sh) skip build-library install
@@ -63,13 +63,11 @@ print_plan() {
   printf '  %-15s %s\n' "NEOVIM""$NEOVIM$([[ "$NEOVIM" == 1 ]] && echo '  (installs neovim, fd, lazygit; LazyVim starter -> ~/.config/nvim'"$([[ -e "${XDG_CONFIG_HOME:-$HOME/.config}/nvim" ]] && echo ', which exists and is left alone')"')')"
   printf '  %-15s %s\n' "STARSHIP" "$STARSHIP$([[ "$STARSHIP" == 1 ]] && echo '  (installs starship with mise; starter ~/.config/starship.toml only if you have none)')"
   if [[ -n "${SKIP_ZSH:-}" ]]; then
-    printf '  %-15s %s\n' "ZSH_PLUGINS" "(skipped: SKIP_ZSH)"
-  elif [[ "$OHMYZSH" == 0 ]]; then
-    printf '  %-15s %s\n' "OHMYZSH" "0  (not installed; plugins and zoxide cd are not asked)"
+    printf '  %-15s %s\n' "SHELL SETUP" "(skipped: SKIP_ZSH)"
   else
-    printf '  %-15s %s\n' "OHMYZSH" "1"
-    printf '  %-15s %s\n' "ZSH_PLUGINS" "${ZSH_PLUGINS:-}"
+    printf '  %-15s %s\n' "OHMYZSH" "$OHMYZSH$([[ "$OHMYZSH" == 1 ]] && echo '  (theme only; no plugins)')"
     printf '  %-15s %s\n' "ZOXIDE_CD" "$ZOXIDE_CD$([[ "$ZOXIDE_CD" == 1 ]] && echo '  (adds ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv)')"
+    printf '  %-15s %s\n' "ZSH_TYPING" "$ZSH_TYPING$([[ "$ZSH_TYPING" == 1 ]] && echo '  (installs zsh-autosuggestions and zsh-syntax-highlighting with Homebrew)')"
   fi
   if (( ${#DERIVED[@]} )); then
     echo
@@ -97,6 +95,7 @@ ask_neovim
 ask_shell
 ask_zsh
 ask_starship
+ask_shell_extras
 
 if dry; then
   print_plan

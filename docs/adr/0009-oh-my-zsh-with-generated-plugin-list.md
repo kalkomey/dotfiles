@@ -1,6 +1,6 @@
 # 0009. oh-my-zsh with a generated plugin list; our aliases win
 
-- Status: Accepted
+- Status: Superseded by [0019](0019-tool-integrations-do-not-depend-on-oh-my-zsh.md)
 - Date: 2026-10-14
 
 ## Context

@@ -17,7 +17,7 @@ one file per decision, numbered in the order they were made.
 | [0006](0006-brewfile-holds-system-packages-only.md) | The Brewfile holds only what mise should not manage | Accepted |
 | [0007](0007-ripgrep-and-gh-replace-ack-ag-hub.md) | ripgrep and gh replace ack, ag and hub | Accepted |
 | [0008](0008-docker-without-docker-desktop.md) | Docker without Docker Desktop (Colima) | Accepted |
-| [0009](0009-oh-my-zsh-with-generated-plugin-list.md) | oh-my-zsh with a generated plugin list; our aliases win | Accepted |
+| [0009](0009-oh-my-zsh-with-generated-plugin-list.md) | oh-my-zsh with a generated plugin list; our aliases win | Superseded by 0019 |
 | [0010](0010-optional-neovim-lazyvim.md) | Optional Neovim + LazyVim alongside the existing vim setup | Accepted |
 | [0011](0011-nerd-fonts-chosen-from-homebrew.md) | Nerd Fonts chosen from what Homebrew offers | Accepted |
 | [0012](0012-never-overwrite-existing-dotfiles.md) | Never overwrite existing dotfiles: ask, back up, never delete | Accepted |
@@ -27,6 +27,7 @@ one file per decision, numbered in the order they were made.
 | [0016](0016-desktop-apps-chosen-in-script-ask.md) | Desktop apps are chosen in `script/ask`, not listed in the Brewfile | Accepted |
 | [0017](0017-starship-prompt-is-opt-in.md) | The starship prompt is an opt-in question, installed with mise | Accepted |
 | [0018](0018-default-gems-installed-with-each-ruby.md) | Public default gems with every Ruby; private gems from a separate installer | Accepted |
+| [0019](0019-tool-integrations-do-not-depend-on-oh-my-zsh.md) | Tool integrations do not depend on oh-my-zsh; oh-my-zsh is theme-only | Accepted |
 
 ## Adding one
 

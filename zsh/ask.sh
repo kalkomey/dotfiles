@@ -1,30 +1,9 @@
 # shellcheck shell=bash
-# zsh topic: whether to install oh-my-zsh and, if so, which plugins to enable.
-# Sourced by script/ask.
-
-PLUGIN_NAMES=(git gh aws docker docker-compose terraform ruby rails bundler npm yarn fzf direnv zoxide tmux macos zsh-autosuggestions zsh-syntax-highlighting)
-PLUGIN_DESCS=(
-  "git aliases (gst, gco, gp...) and branch helpers"
-  "GitHub CLI completions"
-  "AWS CLI completions and profile helpers"
-  "Docker completions"
-  "docker compose aliases"
-  "Terraform completions and aliases"
-  "Ruby aliases"
-  "Rails aliases (rails s, rails c...)"
-  "Bundler aliases (be, bi...)"
-  "npm completions and aliases"
-  "yarn completions and aliases"
-  "fzf keybindings (Ctrl-R history, Ctrl-T files)"
-  "direnv hook"
-  "zoxide init (z and zi commands; needs the zoxide mise tool; ~/.zshrc loads zoxide without this plugin too)"
-  "tmux aliases"
-  "macOS helpers (ofd, pfd, showfiles...)"
-  "fish-style suggestions as you type"
-  "highlights valid/invalid commands as you type"
-)
-PLUGIN_VERS=()
-PLUGIN_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
+# zsh topic: how the shell is set up. Sourced by script/ask.
+#
+# oh-my-zsh is optional and used only for its theme; it loads no plugins. The tool
+# integrations (fzf, zoxide, direnv, completions) live in zsh/integrations.sh and work
+# whichever of oh-my-zsh and starship you pick, or neither.
 
 # One question for the two things that style the shell: oh-my-zsh (a framework with
 # plugins and a theme) and starship (a prompt). Many people want one or the other, some
@@ -58,37 +37,43 @@ ask_shell() {
   done
 }
 
+# oh-my-zsh when it was not settled by ask_shell above (one of OHMYZSH and STARSHIP was
+# already known). Only a theme, so there is no point in it next to starship.
 ask_zsh() {
   [[ -z "${SKIP_ZSH:-}" ]] || return 0
-
-  # oh-my-zsh is optional. Answers saved before this question existed have a plugin
-  # list but no OHMYZSH, and a ZSH_PLUGINS override says the same thing: both mean yes.
-  # With no terminal to ask on, the default is yes, as it was before it was optional.
   if [[ -z "${OHMYZSH:-}" ]]; then
-    OHMYZSH=1
-    if [[ -z "${ZSH_PLUGINS:-}" ]] && can_prompt; then
+    OHMYZSH=0
+    if [[ "${STARSHIP:-0}" != 1 ]] && can_prompt; then
       echo
-      read -r -p "Install oh-my-zsh (a zsh framework with plugins for git, aws, docker and more)? [Y/n] " ans </dev/tty || ans=""
-      [[ ! "$ans" =~ ^[Nn] ]] || OHMYZSH=0
+      read -r -p "Install oh-my-zsh (used only for its prompt theme)? [y/N] " ans </dev/tty || ans=""
+      [[ ! "$ans" =~ ^[Yy] ]] || OHMYZSH=1
     fi
   fi
-  # No oh-my-zsh, so no plugins to choose and nothing for zoxide to take over `cd` through.
-  if [[ "$OHMYZSH" == 0 ]]; then
-    ZSH_PLUGINS=""
-    ZOXIDE_CD=0
-    return 0
-  fi
+  return 0
+}
 
-  resolve_choice ZSH_PLUGINS PLUGIN "oh-my-zsh plugins:" 0 0
+# Two small options that do not depend on oh-my-zsh.
+ask_shell_extras() {
+  [[ -z "${SKIP_ZSH:-}" ]] || return 0
 
-  # zoxide can take over `cd` (z/zi are always defined). Only worth asking if the
-  # plugin is on. zsh/install.sh writes the choice to ~/.zshenv.
+  # zoxide can take over `cd` (z and zi are always there). zsh/install.sh writes the
+  # choice to ~/.zshenv. Only asked if the zoxide tool is being installed.
   if [[ -z "${ZOXIDE_CD:-}" ]]; then
     ZOXIDE_CD=0
-    if [[ " ${ZSH_PLUGINS:-} " == *" zoxide "* ]] && can_prompt; then
+    if [[ " ${MISE_TOOLS:-} " == *" zoxide "* ]] && can_prompt; then
       echo
       read -r -p "Replace 'cd' with zoxide (smarter cd; 'z' works either way; adds ZOXIDE_CMD_OVERRIDE=cd to ~/.zshenv)? [y/N] " ans </dev/tty || ans=""
       [[ "$ans" =~ ^[Yy] ]] && ZOXIDE_CD=1
+    fi
+  fi
+
+  # zsh-autosuggestions and zsh-syntax-highlighting, installed from Homebrew.
+  if [[ -z "${ZSH_TYPING:-}" ]]; then
+    ZSH_TYPING=0
+    if can_prompt; then
+      echo
+      read -r -p "Suggest commands from history and highlight them as you type (zsh-autosuggestions, zsh-syntax-highlighting)? [Y/n] " ans </dev/tty || ans=""
+      [[ "$ans" =~ ^[Nn] ]] || ZSH_TYPING=1
     fi
   fi
   return 0

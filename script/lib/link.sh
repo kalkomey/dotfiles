@@ -252,16 +252,28 @@ link_summary() {
     for k in "${LINK_KEPT[@]}"; do
       [[ "$k" == "$HOME/.zshrc" ]] || continue
       echo
-      say "You kept your ~/.zshrc, so mise and the oh-my-zsh plugins you chose are not loaded. To use them, add to it:"
+      say "You kept your ~/.zshrc, so mise, the tool integrations and your prompt choice are not loaded. To use them, add to it:"
       cat <<'EOF'
+
+    # completions the installer generated (gh, docker, rg...); before compinit
+    fpath=("$HOME/.config/dotfiles/completions" $fpath)
 
     # after any `brew shellenv` line, so mise's ruby/node win over Homebrew's
     eval "$(mise activate zsh)"
-    export ZSH="$HOME/.oh-my-zsh"
-    plugins=(git)
-    [ -r ~/.config/dotfiles/zsh-plugins.zsh ] && source ~/.config/dotfiles/zsh-plugins.zsh
-    source "$ZSH/oh-my-zsh.sh"
-    [ -r ~/.config/dotfiles/starship.zsh ] && source ~/.config/dotfiles/starship.zsh   # only if you chose starship
+
+    # oh-my-zsh, only for its theme (skip these lines if you did not choose it)
+    export ZSH="$HOME/.oh-my-zsh"; ZSH_THEME="robbyrussell"; plugins=()
+    [ -r ~/.config/dotfiles/ohmyzsh.zsh ] && source ~/.config/dotfiles/ohmyzsh.zsh
+    [ "${DOTFILES_OHMYZSH:-1}" != 0 ] && source "$ZSH/oh-my-zsh.sh"
+
+    # fzf, zoxide, direnv and completions
+    source ~/.dotfiles/zsh/integrations.sh
+
+    # starship prompt (only if you chose it)
+    [ -r ~/.config/dotfiles/starship.zsh ] && source ~/.config/dotfiles/starship.zsh
+
+    # suggestions and highlighting as you type (last)
+    source ~/.dotfiles/zsh/typing.sh
 
 EOF
     done

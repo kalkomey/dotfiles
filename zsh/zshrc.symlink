@@ -6,6 +6,9 @@
 typeset -U PATH path fpath
 path=($path)
 
+# Completions that zsh/install.sh generates (gh, docker, rg, ...). Must be on fpath before compinit.
+fpath=("$HOME/.config/dotfiles/completions" $fpath)
+
 # shortcut to this dotfiles path is $DOTHOME
 export DOTHOME=$HOME/.dotfiles
 
@@ -77,41 +80,33 @@ fi
 # before oh-my-zsh so tools it provides (fzf, direnv, zoxide) exist when plugins load.
 eval "$(mise activate zsh)"
 
-# oh-my-zsh (optional). zsh/install.sh installs it and writes the chosen plugin list.
+# oh-my-zsh (optional), used only for its theme. It loads no plugins: fzf, zoxide, direnv,
+# completions and the rest come from zsh/integrations.sh below, so everything works the
+# same with oh-my-zsh, starship, both or neither.
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
-plugins=(git)
-[ -r "$HOME/.config/dotfiles/zsh-plugins.zsh" ] && source "$HOME/.config/dotfiles/zsh-plugins.zsh"
+plugins=()
+[ -r "$HOME/.config/dotfiles/ohmyzsh.zsh" ] && source "$HOME/.config/dotfiles/ohmyzsh.zsh"
 # The generated file sets DOTFILES_OHMYZSH=0 when oh-my-zsh was declined, so an
 # existing ~/.oh-my-zsh is left unloaded rather than silently picked up.
 if [ "${DOTFILES_OHMYZSH:-1}" != 0 ] && [ -r "$ZSH/oh-my-zsh.sh" ]; then
   source "$ZSH/oh-my-zsh.sh"
 fi
 
-# fzf key bindings and completion (Ctrl-R history, Ctrl-T files, Alt-C cd). fzf comes from
-# mise, so there is no ~/.fzf.zsh. The oh-my-zsh fzf plugin does this when oh-my-zsh is
-# loaded and the plugin is chosen; otherwise (starship only, neither, or the plugin
-# left off) do it here so Ctrl-R is always the fzf picker and not zsh's bck-i-search.
-if (( $+commands[fzf] )) && [ ! -f ~/.fzf.zsh ] \
-   && { [ "${DOTFILES_OHMYZSH:-1}" = 0 ] || [ -z "${plugins[(r)fzf]}" ]; }; then
-  source <(fzf --zsh 2>/dev/null)
-fi
+# fzf, zoxide, direnv and completions (independent of oh-my-zsh).
+[ -r "$DOTHOME/zsh/integrations.sh" ] && source "$DOTHOME/zsh/integrations.sh"
 
-# zoxide (z and zi; also cd when ZOXIDE_CMD_OVERRIDE=cd is set in ~/.zshenv). The
-# oh-my-zsh zoxide plugin does this when it is loaded; otherwise (starship only,
-# neither, or the plugin left off) do it here, so the zoxide mise tool always works.
-if (( $+commands[zoxide] )) \
-   && { [ "${DOTFILES_OHMYZSH:-1}" = 0 ] || [ -z "${plugins[(r)zoxide]}" ]; }; then
-  eval "$(zoxide init --cmd "${ZOXIDE_CMD_OVERRIDE:-z}" zsh)"
-fi
-
-# oh-my-zsh plugins define aliases that collide with ours (gc, gd, gca, ...).
+# oh-my-zsh and the tools above can define aliases that collide with ours (gc, gd, gca, ...).
 # Re-source ours so the dotfiles versions (e.g. signed commits) win.
 for f in $DOTHOME/**/aliases.zsh(N); do source $f; done
 
 # starship prompt (optional). starship/install.sh writes this file when you choose it.
 # It goes after oh-my-zsh so the starship prompt replaces the oh-my-zsh theme.
 [ -r "$HOME/.config/dotfiles/starship.zsh" ] && source "$HOME/.config/dotfiles/starship.zsh"
+
+# Suggestions and highlighting as you type (if installed). Last, so highlighting sees
+# every widget bound above.
+[ -r "$DOTHOME/zsh/typing.sh" ] && source "$DOTHOME/zsh/typing.sh"
 
 # import local zsh customizations, if present
 zrcl="$HOME/.zshrc.local"
