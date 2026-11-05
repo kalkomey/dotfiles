@@ -17,7 +17,7 @@ PLUGIN_DESCS=(
   "yarn completions and aliases"
   "fzf keybindings (Ctrl-R history, Ctrl-T files)"
   "direnv hook"
-  "zoxide init (z and zi commands; needs the zoxide mise tool)"
+  "zoxide init (z and zi commands; needs the zoxide mise tool; ~/.zshrc loads zoxide without this plugin too)"
   "tmux aliases"
   "macOS helpers (ofd, pfd, showfiles...)"
   "fish-style suggestions as you type"

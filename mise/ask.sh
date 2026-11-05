@@ -40,7 +40,7 @@ TOOL_DESCS=(
   "HashiCorp Vault"
   "YAML linter (also installs uv, which mise needs to install it)"
   "Yarn package manager"
-  "Smarter cd that learns your directories (z); enabled by the zoxide zsh plugin"
+  "Smarter cd that learns your directories (z, zi); loaded by ~/.zshrc"
 )
 TOOL_VERS=()
 TOOL_ON=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)

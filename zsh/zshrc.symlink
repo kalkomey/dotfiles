@@ -97,6 +97,14 @@ if (( $+commands[fzf] )) && [ ! -f ~/.fzf.zsh ] \
   source <(fzf --zsh 2>/dev/null)
 fi
 
+# zoxide (z and zi; also cd when ZOXIDE_CMD_OVERRIDE=cd is set in ~/.zshenv). The
+# oh-my-zsh zoxide plugin does this when it is loaded; otherwise (starship only,
+# neither, or the plugin left off) do it here, so the zoxide mise tool always works.
+if (( $+commands[zoxide] )) \
+   && { [ "${DOTFILES_OHMYZSH:-1}" = 0 ] || [ -z "${plugins[(r)zoxide]}" ]; }; then
+  eval "$(zoxide init --cmd "${ZOXIDE_CMD_OVERRIDE:-z}" zsh)"
+fi
+
 # oh-my-zsh plugins define aliases that collide with ours (gc, gd, gca, ...).
 # Re-source ours so the dotfiles versions (e.g. signed commits) win.
 for f in $DOTHOME/**/aliases.zsh(N); do source $f; done
